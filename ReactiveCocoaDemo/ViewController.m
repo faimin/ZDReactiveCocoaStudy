@@ -43,7 +43,12 @@
     
     //[self take];
     
-    [self concat];
+    //[self concat];
+    
+    //[self replay];
+    
+    [self replayLazily];
+    
 }
 
 /**
@@ -126,6 +131,7 @@
 
 /**
  *  拼接：把一个信号传递的数据拼接到另一个信号的数据上
+ *  下面的返回结果是ABCDEFGHI123456789
  */
 
 - (void)concat
@@ -137,6 +143,64 @@
     NSLog(@"%@", [concat array]);
 }
 
+/**
+ *  重新运行：当有新的订阅者时信号会重新发送以前发送过的数据给这个订阅者
+ *  下面的例子中，如果不加replay，则第二个订阅者不会受到它上面已经发送过的信号（即s2不执行，不打印任何数据），加上replay后它会收以前已经发送过的A和B两个数据。
+ *  replayLast会把最后一个信号数据发给后来的订阅者，如下，s2只会输出B
+ *  replayLazily 不会重新执行
+ */
+- (void)replay
+{
+    RACSubject *letters = [RACSubject subject]; //RACSubject是RACSignal的子类，它可以快速创建一个信号，用来发送信息
+    //RACSignal *signal = [letters replay];
+    //RACSignal *signal = [letters replayLast];
+    RACSignal *signal = [letters replayLazily];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S1:   %@", x);
+    }];
+    
+    [letters sendNext:@"A"];
+    [letters sendNext:@"B"];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S2:   %@", x);
+    }];
+    
+//        [letters sendNext:@"C"];
+//        [letters sendNext:@"D"];
+    
+//    [signal subscribeNext:^(id x) {
+//        NSLog(@"S3:   %@", x);
+//    }];
+}
+
+/**
+ *  replay或者replayLazily只会让信号里面只发送一次，即只执一次num++，当有订阅者时就只会拿到信号当初发送的数据，不会重新发送新的，如果不用replay，则每次有订阅者都会导致racsignal执行一次
+ */
+- (void)replayLazily
+{
+    __block int num = 0;
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id  subscriber) {
+        num++;
+        NSLog(@"Increment num to: %i", num);
+        [subscriber sendNext:@(num)];
+        return nil;
+    }] replayLazily];
+    
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S1: %@", x);
+    }];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S2: %@", x);
+    }];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S3: %@", x);
+    }];
+}
 
 @end
 
