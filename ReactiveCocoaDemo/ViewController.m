@@ -148,6 +148,7 @@
  *  下面的例子中，如果不加replay，则第二个订阅者不会受到它上面已经发送过的信号（即s2不执行，不打印任何数据），加上replay后它会收以前已经发送过的A和B两个数据。
  *  replayLast会把最后一个信号数据发给后来的订阅者，如下，s2只会输出B
  *  replayLazily 不会重新执行
+ *  http://spin.atomicobject.com/2014/06/29/replay-replaylast-replaylazily/
  */
 - (void)replay
 {
