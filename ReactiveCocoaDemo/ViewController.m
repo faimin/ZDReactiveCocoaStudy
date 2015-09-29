@@ -102,7 +102,7 @@
  *  重新运行：当有新的订阅者时信号会重新发送以前发送过的数据给这个订阅者
  *  下面的例子中，如果不加replay，则第二个订阅者不会受到它上面已经发送过的信号（即s2不执行，不打印任何数据），加上replay后它会收以前已经发送过的A和B两个数据。
  *  replayLast会把最后一个信号数据发给后来的订阅者，如下，s2只会输出B
- *  replayLazily 不会重新执行
+ *  replayLazily 不会重新执行,他与其他2个不同之处是RAC中的信号只有在被订阅后才会执行，而其他的只要执行到那就会执行，就跟do-while一样
  *  http://spin.atomicobject.com/2014/06/29/replay-replaylast-replaylazily/
  */
 - (void)replay
