@@ -9,11 +9,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>LlamaKit.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>Pods.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -24,40 +19,30 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Result.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>207B86F990F1958C59E252530FAC7C07</key>
+		<key>23377847BCD30EB4B54F95C9F323CA1E</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2F2693522709BFA051A15D5E4FDFB9C2</key>
+		<key>422D00646478CCD742021A204BD20FF8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>3BCB5A5A96098CA3A68E6BB65BBCFEB0</key>
+		<key>71A30763753701761542E851D7673201</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>3F95D1B406DCA6A75A96D3A776B5A557</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>92C2B17B9FFD868C9039026803404C54</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>D11CA10FFD018AF93D2D7C3EFCFEE38A</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>EE25D2B77CEA22F939085640832354A2</key>
+		<key>D02E08439589872996252F4061652195</key>
 		<dict>
 			<key>primary</key>
 			<true/>

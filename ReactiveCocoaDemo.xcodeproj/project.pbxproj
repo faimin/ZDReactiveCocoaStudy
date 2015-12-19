@@ -15,7 +15,8 @@
 		BC1E46C71B88B99700838AEF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC1E46C61B88B99700838AEF /* Images.xcassets */; };
 		BC1E46CA1B88B99700838AEF /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC1E46C81B88B99700838AEF /* LaunchScreen.xib */; };
 		BC1E46D61B88B99700838AEF /* ReactiveCocoaDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46D51B88B99700838AEF /* ReactiveCocoaDemoTests.m */; };
-		BCE21CB01B8A13CB00CB734A /* ZAFNetWorkService.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE21CAF1B8A13CB00CB734A /* ZAFNetWorkService.m */; };
+		BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */; };
+		BCFE568D1C25CF1500DD5604 /* RAC使用.txt in Resources */ = {isa = PBXBuildFile; fileRef = BCFE568C1C25CF1500DD5604 /* RAC使用.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,8 +46,9 @@
 		BC1E46CF1B88B99700838AEF /* ReactiveCocoaDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReactiveCocoaDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC1E46D41B88B99700838AEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC1E46D51B88B99700838AEF /* ReactiveCocoaDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactiveCocoaDemoTests.m; sourceTree = "<group>"; };
-		BCE21CAE1B8A13CB00CB734A /* ZAFNetWorkService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZAFNetWorkService.h; sourceTree = "<group>"; };
-		BCE21CAF1B8A13CB00CB734A /* ZAFNetWorkService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZAFNetWorkService.m; sourceTree = "<group>"; };
+		BCFE56891C25CD7F00DD5604 /* ZDAFNetWorkHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZDAFNetWorkHelper.h; sourceTree = "<group>"; };
+		BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZDAFNetWorkHelper.m; sourceTree = "<group>"; };
+		BCFE568C1C25CF1500DD5604 /* RAC使用.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "RAC使用.txt"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,7 +81,8 @@
 		BC1E46AD1B88B99700838AEF = {
 			isa = PBXGroup;
 			children = (
-				BCE21CAD1B8A13CB00CB734A /* ZAFNetWorkService */,
+				BCFE568C1C25CF1500DD5604 /* RAC使用.txt */,
+				BCFE56881C25CD7F00DD5604 /* ZDAFNetWorkHelper */,
 				BC1E46B81B88B99700838AEF /* ReactiveCocoaDemo */,
 				BC1E46D21B88B99700838AEF /* ReactiveCocoaDemoTests */,
 				BC1E46B71B88B99700838AEF /* Products */,
@@ -138,13 +141,13 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		BCE21CAD1B8A13CB00CB734A /* ZAFNetWorkService */ = {
+		BCFE56881C25CD7F00DD5604 /* ZDAFNetWorkHelper */ = {
 			isa = PBXGroup;
 			children = (
-				BCE21CAE1B8A13CB00CB734A /* ZAFNetWorkService.h */,
-				BCE21CAF1B8A13CB00CB734A /* ZAFNetWorkService.m */,
+				BCFE56891C25CD7F00DD5604 /* ZDAFNetWorkHelper.h */,
+				BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */,
 			);
-			path = ZAFNetWorkService;
+			path = ZDAFNetWorkHelper;
 			sourceTree = "<group>";
 		};
 		D47FF584C0A5639F88B6EB5D /* Pods */ = {
@@ -203,7 +206,7 @@
 		BC1E46AE1B88B99700838AEF /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = zd;
 				TargetAttributes = {
 					BC1E46B51B88B99700838AEF = {
@@ -239,6 +242,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BCFE568D1C25CF1500DD5604 /* RAC使用.txt in Resources */,
 				BC1E46C51B88B99700838AEF /* Main.storyboard in Resources */,
 				BC1E46CA1B88B99700838AEF /* LaunchScreen.xib in Resources */,
 				BC1E46C71B88B99700838AEF /* Images.xcassets in Resources */,
@@ -308,8 +312,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC1E46C21B88B99700838AEF /* ViewController.m in Sources */,
+				BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */,
 				BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */,
-				BCE21CB01B8A13CB00CB734A /* ZAFNetWorkService.m in Sources */,
 				BC1E46BC1B88B99700838AEF /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -373,6 +377,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -388,7 +393,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -426,7 +431,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -442,6 +447,7 @@
 				INFOPLIST_FILE = ReactiveCocoaDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zd.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -454,6 +460,7 @@
 				INFOPLIST_FILE = ReactiveCocoaDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zd.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -472,6 +479,7 @@
 				);
 				INFOPLIST_FILE = ReactiveCocoaDemoTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zd.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReactiveCocoaDemo.app/ReactiveCocoaDemo";
 			};
@@ -487,6 +495,7 @@
 				);
 				INFOPLIST_FILE = ReactiveCocoaDemoTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zd.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ReactiveCocoaDemo.app/ReactiveCocoaDemo";
 			};

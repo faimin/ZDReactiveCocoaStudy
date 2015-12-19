@@ -24,16 +24,16 @@
 			@strongify(self);
 			return [RACSignal return:self];
 		}]
-		concat:[self rac_signalForControlEvents:UIControlEventEditingChanged | UIControlEventEditingDidBegin]]
+		concat:[self rac_signalForControlEvents:UIControlEventAllEditingEvents]]
 		map:^(UITextField *x) {
 			return x.text;
 		}]
 		takeUntil:self.rac_willDeallocSignal]
-		setNameWithFormat:@"%@ -rac_textSignal", [self rac_description]];
+		setNameWithFormat:@"%@ -rac_textSignal", RACDescription(self)];
 }
 
 - (RACChannelTerminal *)rac_newTextChannel {
-	return [self rac_channelForControlEvents:UIControlEventEditingChanged | UIControlEventEditingDidBegin key:@keypath(self.text) nilValue:@""];
+	return [self rac_channelForControlEvents:UIControlEventAllEditingEvents key:@keypath(self.text) nilValue:@""];
 }
 
 @end

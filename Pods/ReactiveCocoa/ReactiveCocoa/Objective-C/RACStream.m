@@ -99,21 +99,21 @@
 - (instancetype)mapReplace:(id)object {
 	return [[self map:^(id _) {
 		return object;
-	}] setNameWithFormat:@"[%@] -mapReplace: %@", self.name, [object rac_description]];
+	}] setNameWithFormat:@"[%@] -mapReplace: %@", self.name, RACDescription(object)];
 }
 
 - (instancetype)combinePreviousWithStart:(id)start reduce:(id (^)(id previous, id next))reduceBlock {
 	NSCParameterAssert(reduceBlock != NULL);
 	return [[[self
-		scanWithStart:[RACTuple tupleWithObjects:start, nil]
+		scanWithStart:RACTuplePack(start)
 		reduce:^(RACTuple *previousTuple, id next) {
 			id value = reduceBlock(previousTuple[0], next);
-			return [RACTuple tupleWithObjects:next ?: RACTupleNil.tupleNil, value ?: RACTupleNil.tupleNil, nil];
+			return RACTuplePack(next, value);
 		}]
 		map:^(RACTuple *tuple) {
 			return tuple[1];
 		}]
-		setNameWithFormat:@"[%@] -combinePreviousWithStart: %@ reduce:", self.name, [start rac_description]];
+		setNameWithFormat:@"[%@] -combinePreviousWithStart: %@ reduce:", self.name, RACDescription(start)];
 }
 
 - (instancetype)filter:(BOOL (^)(id value))block {
@@ -133,7 +133,7 @@
 - (instancetype)ignore:(id)value {
 	return [[self filter:^ BOOL (id innerValue) {
 		return innerValue != value && ![innerValue isEqual:value];
-	}] setNameWithFormat:@"[%@] -ignore: %@", self.name, [value rac_description]];
+	}] setNameWithFormat:@"[%@] -ignore: %@", self.name, RACDescription(value)];
 }
 
 - (instancetype)reduceEach:(id (^)())reduceBlock {
@@ -149,7 +149,7 @@
 - (instancetype)startWith:(id)value {
 	return [[[self.class return:value]
 		concat:self]
-		setNameWithFormat:@"[%@] -startWith: %@", self.name, [value rac_description]];
+		setNameWithFormat:@"[%@] -startWith: %@", self.name, RACDescription(value)];
 }
 
 - (instancetype)skip:(NSUInteger)skipCount {
@@ -176,9 +176,13 @@
 		__block NSUInteger taken = 0;
 
 		return ^ id (id value, BOOL *stop) {
-			if (++taken >= count) *stop = YES;
-
-			return [class return:value];
+			if (taken < count) {
+				++taken;
+				if (taken == count) *stop = YES;
+				return [class return:value];
+			} else {
+				return nil;
+			}
 		};
 	}] setNameWithFormat:@"[%@] -take: %lu", self.name, (unsigned long)count];
 }
@@ -257,7 +261,7 @@
 		reduceWithIndex:^(id running, id next, NSUInteger index) {
 			return reduceBlock(running, next);
 		}]
-		setNameWithFormat:@"[%@] -scanWithStart: %@ reduce:", self.name, [startingValue rac_description]];
+		setNameWithFormat:@"[%@] -scanWithStart: %@ reduce:", self.name, RACDescription(startingValue)];
 }
 
 - (instancetype)scanWithStart:(id)startingValue reduceWithIndex:(id (^)(id, id, NSUInteger))reduceBlock {
@@ -273,7 +277,7 @@
 			running = reduceBlock(running, value, index++);
 			return [class return:running];
 		};
-	}] setNameWithFormat:@"[%@] -scanWithStart: %@ reduceWithIndex:", self.name, [startingValue rac_description]];
+	}] setNameWithFormat:@"[%@] -scanWithStart: %@ reduceWithIndex:", self.name, RACDescription(startingValue)];
 }
 
 - (instancetype)takeUntilBlock:(BOOL (^)(id x))predicate {
@@ -325,7 +329,7 @@
 
 	return [[self skipUntilBlock:^ BOOL (id x) {
 		return !predicate(x);
-	}] setNameWithFormat:@"[%@] -skipUntilBlock:", self.name];
+	}] setNameWithFormat:@"[%@] -skipWhileBlock:", self.name];
 }
 
 - (instancetype)distinctUntilChanged {
@@ -344,30 +348,5 @@
 		};
 	}] setNameWithFormat:@"[%@] -distinctUntilChanged", self.name];
 }
-
-@end
-
-@implementation RACStream (Deprecated)
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-implementations"
-
-- (instancetype)sequenceMany:(RACStream * (^)(void))block {
-	NSCParameterAssert(block != NULL);
-
-	return [[self flattenMap:^(id _) {
-		return block();
-	}] setNameWithFormat:@"[%@] -sequenceMany:", self.name];
-}
-
-- (instancetype)scanWithStart:(id)startingValue combine:(id (^)(id running, id next))block {
-	return [self scanWithStart:startingValue reduce:block];
-}
-
-- (instancetype)mapPreviousWithStart:(id)start reduce:(id (^)(id previous, id current))combineBlock {
-	return [self combinePreviousWithStart:start reduce:combineBlock];
-}
-
-#pragma clang diagnostic pop
 
 @end
