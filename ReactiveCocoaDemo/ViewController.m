@@ -44,8 +44,8 @@
     //[self concat];
     
     //[self replay];
-    
-    [self replayLazily];
+    [self replay1];
+    //[self replayLazily];
     
     //[self deliverOn];
     
@@ -131,6 +131,27 @@
 //    }];
 }
 
+- (void)replay1
+{
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"hello"];
+        [subscriber sendCompleted];
+        return [RACDisposable disposableWithBlock:^{
+            //
+        }];
+    }] replay];
+    
+    [[signal map:^id(NSString *value) {
+        return @(value.length);
+    }] subscribeNext:^(id x) {
+        NSLog(@"1 == %@", x);
+    }];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"2 == %@", x);
+    }];
+}
+
 /**
  *  replay或者replayLazily只会让信号里面只发送一次，即只执一次num++，当有订阅者时就只会拿到信号当初发送的数据，不会重新发送新的，如果不用replay，则每次有订阅者都会导致racsignal执行一次
  */
@@ -166,7 +187,6 @@
     
 }
 
-//MARK:过滤
 //http://blog.sunnyxx.com/2014/04/19/rac_4_filters/
 /**
  *  忽略给定的值，注意，这里忽略的既可以是地址相同的对象，也可以是- isEqual:结果相同的值，也就是说自己写的Model对象可以通过重写- isEqual:方法来使- ignore:生效。
@@ -247,7 +267,10 @@
         [subscriber sendNext:@13];
         [subscriber sendNext:@4];
         [subscriber sendNext:@2];
-        return nil;
+        [subscriber sendCompleted];
+        return [RACDisposable disposableWithBlock:^{
+            //
+        }];
     }];
     
     [[signal take:3] subscribeNext:^(id x) {
@@ -296,8 +319,21 @@
 
  */
 
-
-
+- (void)timer
+{
+    ///常用两种：
+    //1. 延迟某个时间后再做某件事
+    [[RACScheduler mainThreadScheduler] afterDelay:2 schedule:^{
+        
+        NSLog(@"你好");
+    }];
+    
+    //2. 每个一定长度时间做一件事
+    [[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(NSDate * date) {
+        
+        NSLog(@"你好啊");
+    }];
+}
 
 
 
