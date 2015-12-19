@@ -335,7 +335,32 @@
     }];
 }
 
-
+//MARK：把网络请求改成信号控制
+//- (RACSignal *)getUserByEmail:(NSString *)email {
+//    return [RACSignal createSignal:^(id<RACSubscriber> subscriber) {
+//        NSString *path = @"https://your.server.address/api/user";
+//        NSDictionary *params = @{ @"email":email };
+//        
+//        NSURLSessionDataTask *task = [self dataTaskWithHTTPMethod:@"GET" URLString:path parameters:params success:^(NSURLSessionDataTask *task, id responseObject) {
+//            NSError *error = nil;
+//            User *user = [MTLJSONAdapter modelOfClass:[User class] fromJSONDictionary:responseObject error:&error];
+//            if (error) {
+//                [subscriber sendError:error];
+//            } else {
+//                [subscriber sendNext:user];
+//                [subscriber sendCompleted];
+//            }
+//        } failure:^(NSURLSessionDataTask *task, NSError *error) {
+//            [subscriber sendError:error];
+//        }];
+//        
+//        [task resume];
+//        
+//        return [RACDisposable disposableWithBlock:^{
+//            [task cancel];
+//        }];
+//    }];
+//}
 
 
 @end
