@@ -20,6 +20,7 @@
 		@strongify(object);
 		id observer = [self addObserverForName:notificationName object:object queue:nil usingBlock:^(NSNotification *note) {
 			[subscriber sendNext:note];
+//            [subscriber sendCompleted];
 		}];
 
 		return [RACDisposable disposableWithBlock:^{

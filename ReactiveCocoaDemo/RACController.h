@@ -8,9 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@interface RACController : UIViewController
 
-@interface ViewController : UIViewController
-
+@property (weak, nonatomic) IBOutlet UILabel *myLabel;
 
 @end
-

@@ -25,13 +25,7 @@ Github主页：
 
 
 
-	
-
-
 在开始具体内容前 ---> (插播：https://github.com/DeveloperLx/LxDBAnything)
-
-
-
 
 
 
@@ -95,12 +89,11 @@ target-action：
 
 	通知：(最简单)
 
-	[[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil] subscribeNext:^(NSNotification * notification) {
+	[[[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil] takeUntil:self.rac_willDeallocSignal] subscribeNext:^(NSNotification * notification) {
         
         LxDBAnyVar(notification);
     }];
 
-	（不需要removeObserver：）
 
 
 
@@ -183,13 +176,6 @@ KVO:
 
 
 
-
-
-
-
-
-
-
 进阶：
 
 
@@ -253,7 +239,7 @@ KVO:
 
     [[[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
        
-        [[RACScheduler mainThreadScheduler]afterDelay:3 schedule:^{
+        [[RACScheduler mainThreadScheduler] afterDelay:3 schedule:^{
            
             [subscriber sendNext:@"rac"];
             [subscriber sendCompleted];
@@ -339,11 +325,6 @@ KVO:
 	        LxPrintAnything(completed);
 	    }];
 
-
-
-
-
-        
 
 	merge:
 
@@ -477,3 +458,4 @@ button setBackgroundColor:forState:
         return date.description;
     }];
 
+有人把以上的信息整理到博客了： http://yimouleng.com/2015/12/20/ios-ReactiveCocoa/
