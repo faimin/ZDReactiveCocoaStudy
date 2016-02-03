@@ -84,20 +84,19 @@
 }
 
 /**
+ *  把多个信号合并成一个信号，任何一个信号有新值的时候就会调用
  *  和combine reduce差不多,总是返回最新的信号
  */
 - (void)merge
 {
-    RACSignal *signalA =
-    [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
         [subscriber sendNext:@"2"];
         [subscriber sendCompleted];
         return nil;
     }];
     
-    RACSignal *signalB =
-    [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"3"];
         //[subscriber sendNext:@"4"];
         [subscriber sendCompleted];
