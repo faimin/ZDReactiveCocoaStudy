@@ -31,7 +31,6 @@
   // Do any additional setup after loading the view, typically from a nib.
 
   [self signal];
-
 }
 
 - (void)didReceiveMemoryWarning
@@ -39,6 +38,8 @@
   [super didReceiveMemoryWarning];
   // Dispose of any resources that can be recreated.
 }
+
+#pragma mark - Function
 
 - (void)signal
 {
@@ -123,29 +124,28 @@
  */
 - (void)zip
 {
-    RACSignal *signalB =
-    [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"3"];
         //[subscriber sendNext:@"4"];
         return nil;
     }];
+
     
-      RACSignal *signalA =
-          [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-            [subscriber sendNext:@"1"];
-            [subscriber sendNext:@"2"];
-            [subscriber sendCompleted];
-            return [RACDisposable disposableWithBlock:^{
-               LxDBAnyVar(@"取消订阅signalA");
-            }];
-          }];
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"1"];
+        [subscriber sendNext:@"2"];
+        [subscriber sendCompleted];
+        return [RACDisposable disposableWithBlock:^{
+           LxDBAnyVar(@"取消订阅signalA");
+        }];
+    }];
 
 
-      [[signalB zipWith:signalA] subscribeNext:^(id x) {
-            RACTupleUnpack(NSString * str1, NSString * str2) = x;
-            NSString *str = FORMATSTRING(@"%@%@", str1, str2);
-            NSLog(@"%@,\n %@", x, str);
-      }];
+    [[signalB zipWith:signalA] subscribeNext:^(id x) {
+        RACTupleUnpack(NSString * str1, NSString * str2) = x;
+        NSString *str = FORMATSTRING(@"%@%@", str1, str2);
+        NSLog(@"%@,\n %@", x, str);
+    }];
 }
 
 /**
@@ -158,14 +158,14 @@
  */
 - (void)concat
 {
-      RACSequence *letters =
-          [@"A B C D E F G H I" componentsSeparatedByString:@" "].rac_sequence;
-      RACSequence *numbers =
-          [@"1 2 3 4 5 6 7 8 9" componentsSeparatedByString:@" "].rac_sequence;
+    RACSequence *letters =
+      [@"A B C D E F G H I" componentsSeparatedByString:@" "].rac_sequence;
+    RACSequence *numbers =
+      [@"1 2 3 4 5 6 7 8 9" componentsSeparatedByString:@" "].rac_sequence;
 
-      RACSequence *concat = [letters concat:numbers];
+    RACSequence *concat = [letters concat:numbers];
 
-      NSLog(@"%@", [concat array]);
+    NSLog(@"%@", [concat array]);
 }
 
 ///当一个订阅者被发送了completed事件后，then:方法才会执行，订阅者会订阅then:方法返回的Signal，这个Signal是在block中返回的。
@@ -193,14 +193,14 @@
     RACSignal *signal = [letters replayLazily];
 
     [signal subscribeNext:^(id x) {
-    NSLog(@"S1:   %@", x);
+        NSLog(@"S1:   %@", x);
     }];
 
     [letters sendNext:@"A"];
     [letters sendNext:@"B"];
 
     [signal subscribeNext:^(id x) {
-    NSLog(@"S2:   %@", x);
+        NSLog(@"S2:   %@", x);
     }];
 
     //        [letters sendNext:@"C"];
@@ -211,25 +211,25 @@
     //    }];
 }
 
-- (void)replay1 {
-      RACSignal *signal =
-          [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-            [subscriber sendNext:@"hello"];
-            [subscriber sendCompleted];
-            return [RACDisposable disposableWithBlock:^{
-                //
-            }];
-          }] replay];
+- (void)replay1
+{
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"hello"];
+        [subscriber sendCompleted];
+        return [RACDisposable disposableWithBlock:^{
+            // TODO:
+        }];
+    }] replay];
 
-      [[signal map:^id(NSString *value) {
+    [[signal map:^id(NSString *value) {
         return @(value.length);
-      }] subscribeNext:^(id x) {
+    }] subscribeNext:^(id x) {
         NSLog(@"1 == %@", x);
-      }];
+    }];
 
-      [signal subscribeNext:^(id x) {
+    [signal subscribeNext:^(id x) {
         NSLog(@"2 == %@", x);
-      }];
+    }];
 }
 
 /**
@@ -237,25 +237,25 @@
  */
 - (void)replayLazily
 {
-      __block int num = 0;
-      RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id subscriber) {
-            num++;
-            NSLog(@"Increment num to: %i", num);
-            [subscriber sendNext:@(num)];
-            return nil;
-      }] replayLazily];
+    __block int num = 0;
+    RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id subscriber) {
+        num++;
+        NSLog(@"Increment num to: %i", num);
+        [subscriber sendNext:@(num)];
+        return nil;
+    }] replayLazily];
 
-      [signal subscribeNext:^(id x) {
-          NSLog(@"S1: %@", x);
-      }];
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S1: %@", x);
+    }];
 
-      [signal subscribeNext:^(id x) {
-          NSLog(@"S2: %@", x);
-      }];
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S2: %@", x);
+    }];
 
-      [signal subscribeNext:^(id x) {
-          NSLog(@"S3: %@", x);
-      }];
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S3: %@", x);
+    }];
 }
 
 /**
@@ -270,11 +270,11 @@
  */
 - (void)distinctUntilChanged
 {
-      [[self.textField.rac_textSignal distinctUntilChanged] subscribeNext:^(id x) {
+    [[self.textField.rac_textSignal distinctUntilChanged] subscribeNext:^(id x) {
         LxDBAnyVar(x);
-      } completed:^{
+    } completed:^{
         LxDBAnyVar(@"completed!!!!");
-      }];
+    }];
 }
 
 // http://blog.sunnyxx.com/2014/04/19/rac_4_filters/
@@ -286,9 +286,9 @@
  */
 - (void)ignore
 {
-  [[self.textField.rac_textSignal ignore:@"123"] subscribeCompleted:^{
-    LxDBAnyVar(@"完成");
-  }];
+    [[self.textField.rac_textSignal ignore:@"123"] subscribeCompleted:^{
+        LxDBAnyVar(@"完成");
+    }];
 }
 
 /**
@@ -314,30 +314,29 @@
  */
 - (void)skip
 {
-  RACSignal *signalA =
-      [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-          [subscriber sendNext:@1];
-          [subscriber sendNext:@2];
-          [subscriber sendNext:@13];
-          [subscriber sendNext:@4];
-          [subscriber sendNext:@2];
-          [subscriber sendCompleted];
-          return nil;
-      }];
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@1];
+        [subscriber sendNext:@2];
+        [subscriber sendNext:@13];
+        [subscriber sendNext:@4];
+        [subscriber sendNext:@2];
+        [subscriber sendCompleted];
+        return nil;
+    }];
 
-      [[signalA skip:3] subscribeNext:^(id x) {
+    [[signalA skip:3] subscribeNext:^(id x) {
         NSLog(@"skip result = %@", x);
-      }];
+    }];
 
-      ///当某一个数据符合block里面的条件时就会把它之前的数据都跳过去了，只输出后面的数据，此时block也不再执行
-      [[signalA skipUntilBlock:^BOOL(id x) {
+    ///当某一个数据符合block里面的条件时就会把它之前的数据都跳过去了，只输出后面的数据，此时block也不再执行
+    [[signalA skipUntilBlock:^BOOL(id x) {
         if ([x integerValue] > 2) {
           return YES;
         }
         return NO;
-      }] subscribeNext:^(id x) {
+    }] subscribeNext:^(id x) {
         NSLog(@"%@", x);
-      }];
+    }];
 }
 
 /**
@@ -345,8 +344,8 @@
  */
 - (void)take
 {
-  RACSignal *signal =
-      [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+    RACSignal *signal =
+    [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"你好"];
         [subscriber sendNext:@1];
         [subscriber sendNext:@2];
@@ -356,17 +355,17 @@
         [subscriber sendCompleted];
         // disposable在发送complete或者error消息后执行
         return [RACDisposable disposableWithBlock:^{
-          LxPrintAnything(执行disposable信号被销毁了);
+            LxPrintAnything(执行disposable信号被销毁了);
         }];
-      }];
+    }];
 
-  [[signal take:3] subscribeNext:^(id x) {
-    LxDBAnyVar(x);
-  }];
+    [[signal take:3] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
 
-  [signal subscribeNext:^(id x) {
-    LxDBAnyVar(x);
-  }];
+    [signal subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
 }
 
 //   - takeLast: (NSUInteger)
@@ -411,29 +410,30 @@
 */
 - (void)takeUntil
 {
-  [[self.textField.rac_textSignal takeUntilBlock:^BOOL(NSString *text) {
-    return [text isEqualToString:@"结束"];
-  }] subscribeNext:^(id x) {
-    LxDBAnyVar(x);
-  } completed:^{
-    LxDBAnyVar(@"完成");
-  }];
+    [[self.textField.rac_textSignal takeUntilBlock:^BOOL(NSString *text) {
+        return [text isEqualToString:@"结束"];
+    }] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    } completed:^{
+        LxDBAnyVar(@"完成");
+    }];
 }
 
 - (void)timer
 {
-  ///常用两种：
-  // 1. 延迟某个时间后再做某件事
-  [[RACScheduler mainThreadScheduler] afterDelay:2
+    ///常用两种：
+    // 1. 延迟某个时间后再做某件事
+    [[RACScheduler mainThreadScheduler] afterDelay:2
                                         schedule:^{
-                                          NSLog(@"你好");
+                                            LxDBAnyVar(@"你好");
                                         }];
 
-  // 2. 每个一定长度时间做一件事
-  [[[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]] takeUntil:self.rac_willDeallocSignal]
+    // 2. 每个一定长度时间做一件事
+    [[[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]]
+      takeUntil:self.rac_willDeallocSignal]
       subscribeNext:^(NSDate *date) {
-        NSLog(@"你好啊");
-      }];
+          LxDBAnyVar(@"你好");
+    }];
 }
 
 // MARK：把网络请求改成信号控制
@@ -470,14 +470,10 @@
 /// 这个方法常用于处理输入框等信号（用户打字很快），因为它只保留用户最后输入的文字并返回一个新的Signal，将最后的文字作为next事件参数发出。
 ///
 /// 如下0.3秒内textField输入n多个字符，0.3秒后才会把值输出，即：把0.3秒内接收到的信息到最后一块发出去
-- (void)throttle {
-    [[[[self.textField.rac_textSignal
-         ignore:@""]
-        throttle:0.3]
-       distinctUntilChanged]
-     subscribeNext:^(id x) {
-         
-         LxDBAnyVar(x);
+- (void)throttle
+{
+    [[[[self.textField.rac_textSignal ignore:@""] throttle:0.3] distinctUntilChanged] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
     }];
 }
 
@@ -485,15 +481,9 @@
 /// 下面的方法会crash，因为不是信号中的信号
 - (void)swithToLatest
 {
-    [[[[[self.textField.rac_textSignal
-         ignore:@""]
-        throttle:0.3]
-       distinctUntilChanged]
-      switchToLatest]
-     subscribeNext:^(id x) {
-         
-         LxDBAnyVar(x);
-     }];
+    [[[[[self.textField.rac_textSignal ignore:@""] throttle:0.3] distinctUntilChanged] switchToLatest] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
 }
 
 
@@ -507,45 +497,41 @@
 
         return
             [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-
                   //  network request
                   [subscriber sendNext:value];
                   [subscriber sendCompleted];
 
                   return [RACDisposable disposableWithBlock:^{
-
-                      //  cancel request
+                      // cancel request
                   }];
             }];
     }] switchToLatest] subscribeNext:^(id x) {
-
         LxDBAnyVar(x);
     }];
 }
 
 #pragma mark - 跳转
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-  if ([segue.identifier isEqualToString:@"customID"]) {
-      PushController *pushVC = segue.destinationViewController;
-      __block NSUInteger i = 0;
-      pushVC.command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-          return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-              [subscriber sendNext:@(++i)];
-              [subscriber sendCompleted];
-              return [RACDisposable disposableWithBlock:^{
-                  LxPrintAnything(点击按钮信号释放了);
-              }];
-          }];
-      }];
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if ([segue.identifier isEqualToString:@"customID"]) {
+        PushController *pushVC = segue.destinationViewController;
+        __block NSUInteger i = 0;
+        pushVC.command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+            return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+                [subscriber sendNext:@(++i)];
+                [subscriber sendCompleted];
+                return [RACDisposable disposableWithBlock:^{
+                    LxPrintAnything(点击按钮信号释放了);
+                }];
+            }];
+        }];
       
-      ///The executionSignals property of RACCommand is a signal that sends a next: every time the commands start executing. The argument is the signal created by the command. So it’s a signal of signals.
-      ///There is an important details to note about the executionSignals property. The signals sent here do not include error events. For those there is a special errors property.
-      [[pushVC.command.executionSignals
-        concat]
-       subscribeNext:^(id x) {
-          LxDBAnyVar(x);
-      }];
+        ///The executionSignals property of RACCommand is a signal that sends a next: every time the commands start executing. The argument is the signal created by the command. So it’s a signal of signals.
+        ///There is an important details to note about the executionSignals property. The signals sent here do not include error events. For those there is a special errors property.
+        [[pushVC.command.executionSignals concat] subscribeNext:^(id x) {
+            LxDBAnyVar(x);
+        }];
       
 //      [[pushVC.command.executionSignals map:^id(id value) {
 //          LxDBAnyVar(value);
@@ -554,12 +540,12 @@
 //          LxDBAnyVar(x);
 //      }];
       
-      [pushVC.command.executing subscribeNext:^(id x) {
-          NSString *result = ([x integerValue] == 1) ? @"执行中" : @"未执行";
-          LxDBAnyVar(result);
-      }];
+        [pushVC.command.executing subscribeNext:^(id x) {
+            NSString *result = ([x integerValue] == 1) ? @"执行中" : @"未执行";
+            LxDBAnyVar(result);
+        }];
       
-  }
+    }
 }
 
 
