@@ -19,6 +19,7 @@
 @interface RACController ()
 
 @property(weak, nonatomic) IBOutlet UITextField *textField;
+@property (weak, nonatomic) IBOutlet UIButton *showTextButton;
 @property(weak, nonatomic) IBOutlet UIButton *pushButton;
 
 @end
@@ -27,15 +28,16 @@
 
 - (void)viewDidLoad
 {
-  [super viewDidLoad];
-  // Do any additional setup after loading the view, typically from a nib.
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
 
-  [self signal];
+    [self signal];
+    [self actions];
 }
 
 - (void)didReceiveMemoryWarning
 {
-  [super didReceiveMemoryWarning];
+    [super didReceiveMemoryWarning];
   // Dispose of any resources that can be recreated.
 }
 
@@ -507,6 +509,19 @@
             }];
     }] switchToLatest] subscribeNext:^(id x) {
         LxDBAnyVar(x);
+    }];
+}
+
+#pragma mark - Action
+
+- (void)actions
+{
+    @weakify(self);
+    self.showTextButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        @strongify(self);
+        [self.textField resignFirstResponder];
+        self.myLabel.text = self.textField.text;
+        return [RACSignal empty];
     }];
 }
 
