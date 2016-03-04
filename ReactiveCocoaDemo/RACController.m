@@ -4,10 +4,10 @@
 //
 //  Created by 符现超 on 15/8/22.
 //  Copyright (c) 2015年 zd. All rights reserved.
-//
+//  信号演示网站：http://neilpa.me/rac-marbles/
 
-#import "PushController.h"
 #import "RACController.h"
+#import "PushController.h"
 #import <ReactiveCocoa/ReactiveCocoa.h>
 #import "ZDAFNetWorkHelper.h"
 #import <LxDBAnything.h>
@@ -31,7 +31,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
 
-    [self signal];
+    [self signals];
     [self actions];
 }
 
@@ -41,19 +41,24 @@
   // Dispose of any resources that can be recreated.
 }
 
-#pragma mark - Function
+#pragma mark - Signal
+#pragma mark -
 
-- (void)signal
+- (void)signals
 {
-//    [self zip];
+    //[self combineLatestReduce];
+    
+    //[self zip];
 
-//    [self merge];
+    //[self merge];
 
     //[self skip];
 
     //[self take];
 
     //[self concat];
+    
+    [self then];
 
     //[self replay];
 
@@ -63,11 +68,11 @@
 
     //[self deliverOn];
     
-    [self throttle];
+    //[self throttle];
     
 }
 
-#pragma mark - Signals
+#pragma mark - Functions
 #pragma mark -
 // RACSignal底层实现：
 // 1.创建信号，首先把didSubscribe保存到信号中，还不会触发。
@@ -78,12 +83,51 @@
 // 3.1 sendNext底层其实就是执行subscriber的nextBlock
 
 
-///将一组Signal发出的最新的事件合并成一个Signal，每当这组Signal发出新事件时，reduce的block会执行，将所有新事件的值合并成一个值，并当做合并后Signal的事件发出去。
-///这个方法会返回合并后的Signal。
-///reduce的block中参数，其实是与combineLatest中数组元素一一对应的
+/// 将一组Signal发出的最新的事件合并成一个Signal，每当这组Signal发出新事件时，reduce的block会执行，将所有新事件的值合并成一个值，并当做合并后Signal的事件发出去。
+/// 这个方法会返回合并后的Signal。
+/// reduce的block中参数，其实是与combineLatest中数组元素一一对应的
+/// 注意：
 - (void)combineLatestReduce
 {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"1"];
+        [subscriber sendNext:@"2"];
+        [subscriber sendNext:@"3"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
     
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"11"];
+        [subscriber sendNext:@"12"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    RACSignal *signalC = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"21"];
+        [subscriber sendNext:@"22"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    [[RACSignal combineLatest:@[signalA, signalB, signalC] reduce:^id(NSString *a , NSString *b, NSString *c){
+        NSString *resultString = [NSString stringWithFormat:@"\na = %@, b = %@, c = %@", a, b, c];
+        LxDBAnyVar(resultString);
+        return resultString;
+    }] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
+    
+    [[RACSignal combineLatest:@[signalA, signalB]] subscribeNext:^(RACTuple *x) {
+        RACSequence *seque = x.rac_sequence;
+        NSArray *resultArray = seque.array;
+        LxDBAnyVar(resultArray);
+        
+        RACTupleUnpack(NSString * str1, NSString * str2) = x;
+        NSString *str = FORMATSTRING(@"%@%@", str1, str2);
+        LxPrintf(@"%@,\n %@", x, str);
+    }];
 }
 
 /**
@@ -106,10 +150,6 @@
         return nil;
     }];
     
-//    [RACSignal combineLatest:[signalA, signalB] reduce:^id(NSString *a , NSString * b){
-//        
-//    }];
-    
     [[signalA merge:signalB] subscribeNext:^(id x) {
         LxDBAnyVar(x);
     }];
@@ -120,7 +160,7 @@
  * zipWith:B]中A和B至少发送过一次消息，zip才会把他们打包成一个tuple
  *
  *  比如下面的demo，如果打开signalB中的sendNext:@"4",
- * 则会输出2次，输出结果分别为13，24，如果不打开则只输出一个结果：13，相当于两个信号中的数据会一一映射，当对应的数据缺失时则不执行压缩操作
+ *  则会输出2次，输出结果分别为13，24，如果不打开则只输出一个结果：13，相当于两个信号中的数据会一一映射，当对应的数据缺失时则不执行压缩操作
  *
  *  [C zipWith:D]可以比喻成一对平等恩爱的夫妻，两个人是“绑在一起“的关系来组成一个家庭，决定一件事（value）时必须两个人都提出意见（当且仅当C和D同时都产生了值的时候，一个value才被输出，C、D只有其中一个有值时会挂起，等待另一个的值，所以输出都是一对值（RACTuple）），当夫妻只要一个人先挂了（completed）这个家庭（组合起来的RACStream）就宣布解散（也就是无法凑成一对输出时就终止）
  */
@@ -131,7 +171,6 @@
         //[subscriber sendNext:@"4"];
         return nil;
     }];
-
     
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
@@ -142,16 +181,16 @@
         }];
     }];
 
-
     [[signalB zipWith:signalA] subscribeNext:^(id x) {
         RACTupleUnpack(NSString * str1, NSString * str2) = x;
         NSString *str = FORMATSTRING(@"%@%@", str1, str2);
-        NSLog(@"%@,\n %@", x, str);
+        LxPrintf(@"%@,\n %@", x, str);
     }];
 }
 
 /**
- *  @brief  合并：把一个信号传递的数据拼接到另一个信号的数据上
+ *  @brief  连接：把一个信号传递的数据拼接到另一个信号的数据上
+ *  返回一个新的数组。该数组是通过把所有 arrayX 参数添加到 arrayObject 中生成的。如果要进行 concat() 操作的参数是数组，那么添加的是数组中的元素，而不是数组。
  *
  *  [A concat:B]中只有A信号执行完complete之后才会执行B，如果A失败（比如执行了sendError），则B永远不会执行
  *  A和B像皇上和太子的关系，A是皇上，B是太子。皇上健在的时候统治天下发号施令（value），太子就候着，不发号施令（value），当皇上挂了（completed），太子登基当皇上，此时发出的号令（value）是太子的。
@@ -166,15 +205,33 @@
       [@"1 2 3 4 5 6 7 8 9" componentsSeparatedByString:@" "].rac_sequence;
 
     RACSequence *concat = [letters concat:numbers];
-
-    NSLog(@"%@", [concat array]);
+    LxDBAnyVar([concat array]);
 }
 
-///当一个订阅者被发送了completed事件后，then:方法才会执行，订阅者会订阅then:方法返回的Signal，这个Signal是在block中返回的。
-///这样优雅的实现了从一个Signal到另一个Signal的订阅。
+/// 当一个订阅者被发送了completed事件后，then:方法才会执行，订阅者会订阅then:方法返回的Signal，这个Signal是在block中返回的。
+/// 这样优雅的实现了从一个Signal到另一个Signal的订阅。
 - (void)then
 {
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"1"];
+        [subscriber sendNext:@"2"];
+        [subscriber sendNext:@"3"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
     
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"11"];
+        [subscriber sendNext:@"12"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    [[signalA then:^RACSignal *{
+        return signalB;
+    }] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
 }
 
 /**
@@ -377,7 +434,7 @@
 //
 //   - takeUntil:(RACSignal *)
 //
-//   当给定的signal完成前一直取值。最简单的栗子就是UITextField的rac_textSignal的实现（删减版本）:
+//   当给定的signal完成前一直取值。最简单的例子就是UITextField的rac_textSignal的实现（删减版本）:
 //
 //   - (RACSignal *)rac_textSignal {
 //    @weakify(self);
@@ -488,12 +545,22 @@
     }];
 }
 
-
-
+- (void)materialize
+{
+    [self.showTextButton.rac_command.executionSignals flattenMap:^RACStream *(RACSignal *subscribeSignal) {
+        // materialize 把信号转化成事件
+        return [[[subscribeSignal materialize] filter:^BOOL(RACEvent *event) {
+            return (event.eventType == RACEventTypeCompleted);
+        }] map:^id(id value) {
+            return NSLocalizedString(@"Thanks", @"谢谢");
+        }];
+    }];
+}
 
 #pragma mark - Search
 
-- (void)search {
+- (void)search
+{
     [[[[[[self.textField.rac_textSignal throttle:0.3] distinctUntilChanged]
       ignore:@""] map:^id(id value) {
 
@@ -523,6 +590,7 @@
         self.myLabel.text = self.textField.text;
         return [RACSignal empty];
     }];
+    
 }
 
 #pragma mark - 跳转
