@@ -1,6 +1,6 @@
 > 以下说明来自DeverlopLx大神的斗鱼直播提纲
 
-##1. 神马是rac
+##1. RAC简介
 
 > * `Github`开源的一个应用于 iOS 和 OS X 开发的框架， 兼具 函数式编程 和 响应式编程 的特性。
 > * `Mattt Thompson` 大神 : 开启了一个新`Objective-C`纪元
@@ -24,8 +24,7 @@
 在开始具体内容前 ---> (插播一个可以打印任何东西的宏：[https://github.com/DeveloperLx/LxDBAnything](https://github.com/DeveloperLx/LxDBAnything))
 
 
-##最常用的几招：（死记硬背都能会的）
-
+##最常用的函数：
 **target-action：**
 
 >* 文本框事件：
@@ -55,12 +54,10 @@
 
     [[textField rac_signalForControlEvents:UIControlEventEditingChanged]
     subscribeNext:^(id x) {
-       
         LxDBAnyVar(x);
     }];
 
     [textField.rac_textSignal subscribeNext:^(id x) {
-       
         LxDBAnyVar(x);
     }];
     
@@ -69,14 +66,13 @@
 
 
 
->* 手势：(不待演示老式的写法了)
+>* 手势：
 
 ```objc
 	self.view.userInteractionEnabled = YES;
     
     UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc]init];
     [[tap rac_gestureSignal] subscribeNext:^(UITapGestureRecognizer * tap) {
-       
         LxDBAnyVar(tap);
     }];
     [self.view addGestureRecognizer:tap];
@@ -87,30 +83,27 @@
 >* 通知：(最简单)
 	
 ```objc
-
-	[[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil] subscribeNext:^(NSNotification * notification) {
-        
+	// 不需要removeObserver
+	// 不要忘记添加takeUntil: 否则会出现observer未移除导致的内存泄露
+	[[[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil] takeUntil:self.rac_willDeallocSignal] subscribeNext:^(NSNotification * notification) {
         LxDBAnyVar(notification);
     }];
-
-	//（不需要removeObserver：）
+	
 ```
 
 >* 定时器：
 
-常用两种：
 ```objc
+	// 常用两种：
 	//1. 延迟某个时间后再做某件事
 
 	[[RACScheduler mainThreadScheduler]afterDelay:2 schedule:^{
-       
         LxPrintAnything(rac);
     }];
 
     //2. 每个一定长度时间做一件事
 
     [[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(NSDate * date) {
-       
         LxDBAnyVar(date);
     }];
 ```
@@ -121,7 +114,6 @@
 ```objc
     UIAlertView * alertView = [[UIAlertView alloc]initWithTitle:@"RAC" message:@"ReactiveCocoa" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ensure", nil];
     [[self rac_signalForSelector:@selector(alertView:clickedButtonAtIndex:) fromProtocol:@protocol(UIAlertViewDelegate)] subscribeNext:^(RACTuple * tuple) {
-        
         LxDBAnyVar(tuple);
         
         LxDBAnyVar(tuple.first);
@@ -132,7 +124,6 @@
 
     //更简单的方式：
     [[alertView rac_buttonClickedSignal] subscribeNext:^(id x) {
-       
         LxDBAnyVar(x);
     }];
 
@@ -153,9 +144,8 @@
     @weakify(self);
     
     [scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-        
         @strongify(self);
-        make.edges.equalTo(self.view).insets(UIEdgeInsetsMake(80, 80, 80, 80));
+          make.edges.equalTo(self.view).insets(UIEdgeInsetsMake(80, 80, 80, 80));
     }];
     
     [scrollViewContentView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -166,7 +156,6 @@
     }];
     
     [RACObserve(scrollView, contentOffset) subscribeNext:^(id x) {
-       
         LxDBAnyVar(x);
     }];
 
@@ -266,6 +255,7 @@
 `distinctUntilChanged:`
 `ignore:`
 `switchToLatest:`
+
 ```objc
     UITextField * textField = [[UITextField alloc]init];
     textField.backgroundColor = [UIColor cyanColor];
@@ -280,7 +270,7 @@
         make.center.equalTo(self.view);
     }];
     
-    [[[[[[textField.rac_textSignal throttle:0.3]distinctUntilChanged]ignore:@""] map:^id(id value) {
+    [[[[[[textField.rac_textSignal throttle:0.3] distinctUntilChanged]ignore:@""] map:^id(id value) {
         
         return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
            
@@ -300,6 +290,7 @@
 ```
 
 `repeat:`
+
 ```objc
 		[[[[[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
        
@@ -317,6 +308,7 @@
 ```
 
 `merge:`
+
 ```objc
 	RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
       
@@ -348,7 +340,8 @@
 
 `combineLatest:reduce:`
 
-`concat:` （一个异步请求完成后，再启动另一个）
+`concat:` （连接: 一个请求完成后，再启动另一个）
+
 ```objc
 	RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
       
@@ -378,7 +371,8 @@
     }];
 ```
 
-`zipWith:/combineLatest: `  （多个异步请求都完成后，再做某件事）
+`zipWith: `  （zip是成对出现的,二者都发送完毕或者无法凑成一对时,终止.意味着如果是一个流的第N个元素，一定要等到另外一个流第N值也收到才会一起组合发出。）
+
 ```objc
 	RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
       
@@ -445,3 +439,12 @@
         return date.description;
     }];
 ```
+
+####**几张图对函数的说明**
+![CombineLatest](http://img0.tuicool.com/QbyMjyR.png)
+![Zip](http://img2.tuicool.com/JBrMn2r.png)
+![](http://img0.tuicool.com/Nr2AriV.png)
+![Merge](http://img1.tuicool.com/U3Mzym3.png)
+![Concat](http://img0.tuicool.com/faIv6bu.png)
+
+

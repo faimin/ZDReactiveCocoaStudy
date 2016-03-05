@@ -8,21 +8,52 @@
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>FDStackView.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>Masonry.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>5</integer>
 		</dict>
 		<key>Pods.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>2</integer>
 		</dict>
 		<key>ReactiveCocoa.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>Result.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>6</integer>
 		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>20336DA669CFEE6D72FD02D06A642074</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>2F2693522709BFA051A15D5E4FDFB9C2</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>3A70C39C2BD2C13EC3C3B18786CE8867</key>
 		<dict>
 			<key>primary</key>
 			<true/>
@@ -32,7 +63,27 @@
 			<key>primary</key>
 			<true/>
 		</dict>
+		<key>71A30763753701761542E851D7673201</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>8F58ACF483FFE87A54499B56E2DADC0E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>92C2B17B9FFD868C9039026803404C54</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D02E08439589872996252F4061652195</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D070C3FFC07CC4EBECD154664DFB6003</key>
 		<dict>
 			<key>primary</key>
 			<true/>

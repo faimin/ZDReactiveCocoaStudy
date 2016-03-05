@@ -161,6 +161,8 @@
  *
  *  比如下面的demo，如果打开signalB中的sendNext:@"4",
  *  则会输出2次，输出结果分别为13，24，如果不打开则只输出一个结果：13，相当于两个信号中的数据会一一映射，当对应的数据缺失时则不执行压缩操作
+ 
+ *  意味着如果是一个流的第N个元素，一定要等到另外一个流第N值也收到才会一起组合发出。
  *
  *  [C zipWith:D]可以比喻成一对平等恩爱的夫妻，两个人是“绑在一起“的关系来组成一个家庭，决定一件事（value）时必须两个人都提出意见（当且仅当C和D同时都产生了值的时候，一个value才被输出，C、D只有其中一个有值时会挂起，等待另一个的值，所以输出都是一对值（RACTuple）），当夫妻只要一个人先挂了（completed）这个家庭（组合起来的RACStream）就宣布解散（也就是无法凑成一对输出时就终止）
  */
@@ -550,7 +552,7 @@
     [self.showTextButton.rac_command.executionSignals flattenMap:^RACStream *(RACSignal *subscribeSignal) {
         // materialize 把信号转化成事件
         return [[[subscribeSignal materialize] filter:^BOOL(RACEvent *event) {
-            return (event.eventType == RACEventTypeCompleted);
+            return event.finished;
         }] map:^id(id value) {
             return NSLocalizedString(@"Thanks", @"谢谢");
         }];
