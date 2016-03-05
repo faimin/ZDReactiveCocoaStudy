@@ -1,4 +1,4 @@
-> 以下说明来自DeverlopLx大神的斗鱼直播提纲
+
 
 ##1. RAC简介
 
@@ -21,7 +21,7 @@
 登录/注销需求：
 用户名、密码的长度均大于0，且当前尚未登录，登录按钮才可以点击（需要实时性地控制登录按钮是否可用的状态！）
 
-在开始具体内容前 ---> (插播一个可以打印任何东西的宏：[https://github.com/DeveloperLx/LxDBAnything](https://github.com/DeveloperLx/LxDBAnything))
+可以打印任何东西的宏：[https://github.com/DeveloperLx/LxDBAnything](https://github.com/DeveloperLx/LxDBAnything))
 
 
 ##最常用的函数：
@@ -443,7 +443,7 @@
 ####**几张图对函数的说明**
 ![CombineLatest](http://img0.tuicool.com/QbyMjyR.png)
 ![Zip](http://img2.tuicool.com/JBrMn2r.png)
-![](http://img0.tuicool.com/Nr2AriV.png)
+![操作结果](http://img0.tuicool.com/Nr2AriV.png)
 ![Merge](http://img1.tuicool.com/U3Mzym3.png)
 ![Concat](http://img0.tuicool.com/faIv6bu.png)
 

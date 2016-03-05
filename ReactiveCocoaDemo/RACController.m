@@ -547,6 +547,7 @@
     }];
 }
 
+///  把信号转化成事件
 - (void)materialize
 {
     [self.showTextButton.rac_command.executionSignals flattenMap:^RACStream *(RACSignal *subscribeSignal) {
@@ -557,6 +558,27 @@
             return NSLocalizedString(@"Thanks", @"谢谢");
         }];
     }];
+}
+
+
+///  当signalA和signalB都至少sendNext过一次，接下来只要其中任意一个signal有了新的内容，doA:withB这个方法就会自动被触发。
+- (void)liftSelector
+{
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [subscriber sendNext:@"A"];
+        });
+        return nil;
+    }];
+    
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"B"];
+        [subscriber sendNext:@"Another B"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    [self rac_liftSelector:@selector(doA:withB:) withSignals:signalA, signalB, nil];
 }
 
 #pragma mark - Search
@@ -593,6 +615,11 @@
         return [RACSignal empty];
     }];
     
+}
+
+- (void)doA:(NSString *)A withB:(NSString *)B
+{
+    NSLog(@"A:%@ and B:%@", A, B);
 }
 
 #pragma mark - 跳转
