@@ -5,6 +5,7 @@
 //  Created by 符现超 on 15/8/22.
 //  Copyright (c) 2015年 zd. All rights reserved.
 //  信号演示网站：http://neilpa.me/rac-marbles/
+//  http://www.tuicool.com/articles/Yrim6zZ
 
 #import "RACController.h"
 #import "PushController.h"
