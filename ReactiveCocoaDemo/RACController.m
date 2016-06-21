@@ -23,7 +23,7 @@
 @interface RACController ()
 
 @property(weak, nonatomic) IBOutlet UITextField *textField;
-@property (weak, nonatomic) IBOutlet UIButton *showTextButton;
+@property(weak, nonatomic) IBOutlet UIButton *showTextButton;
 @property(weak, nonatomic) IBOutlet UIButton *pushButton;
 
 @end
@@ -210,7 +210,7 @@
     //print: ABCDEFGHI123456789
 }
 
-/// 当一个订阅者被发送了completed事件后，then:方法才会执行，订阅者会订阅then:方法返回的Signal，这个Signal是在block中返回的。
+/// 当一个订阅者被发送了completed事件后，then:方法才会执行，订阅者会订阅then:方法返回的Signal，这个Signal是在block中返回的。（忽略掉第一个信号的所有值）
 /// 这样优雅的实现了从一个Signal到另一个Signal的订阅。
 - (void)then
 {
@@ -313,6 +313,27 @@
     [signal subscribeNext:^(id x) {
         NSLog(@"S3: %@", x);
     }];
+}
+
+- (void)mutableConnection
+{
+    RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"发送信息"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    RACMulticastConnection *connection = [signal publish];
+    
+    RACSignal *connectSignal = connection.signal;
+    [connectSignal subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
+    [connectSignal subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
+    
+    [connection connect];
 }
 
 ///  参数为RACScheduler类的对象scheduler，这个方法会返回一个Signal，它的所有事件都会传递给scheduler参数所表示的线程，而以前管道上的副作用还会在以前的线程上。这个方法主要是切换线程。
