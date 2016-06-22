@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05671AF21D1AFDCC00A2BAAB /* 对ReactiveCocoa的一些理解.md in Sources */ = {isa = PBXBuildFile; fileRef = 05671AF11D1AFDCC00A2BAAB /* 对ReactiveCocoa的一些理解.md */; };
 		2AF65C2A13C3D25D4B781C39 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 36E117903DF9890BCD5B707E /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		BC1E46BC1B88B99700838AEF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46BB1B88B99700838AEF /* main.m */; };
 		BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46BE1B88B99700838AEF /* AppDelegate.m */; };
@@ -32,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		05671AF11D1AFDCC00A2BAAB /* 对ReactiveCocoa的一些理解.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "对ReactiveCocoa的一些理解.md"; sourceTree = "<group>"; };
 		36E117903DF9890BCD5B707E /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		38A2DE72A0E0DA752A47B40A /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		961284FBDB6CE258EC18A7A0 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 		BC1E46AD1B88B99700838AEF = {
 			isa = PBXGroup;
 			children = (
+				05671AF11D1AFDCC00A2BAAB /* 对ReactiveCocoa的一些理解.md */,
 				BCFE568C1C25CF1500DD5604 /* RAC使用.txt */,
 				BCFE56881C25CD7F00DD5604 /* ZDAFNetWorkHelper */,
 				BC1E46B81B88B99700838AEF /* ReactiveCocoaDemo */,
@@ -323,6 +326,7 @@
 			files = (
 				BC1E46C21B88B99700838AEF /* RACController.m in Sources */,
 				BCE3E4371C2C0B47000A343A /* PushController.m in Sources */,
+				05671AF21D1AFDCC00A2BAAB /* 对ReactiveCocoa的一些理解.md in Sources */,
 				BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */,
 				BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */,
 				BC1E46BC1B88B99700838AEF /* main.m in Sources */,
