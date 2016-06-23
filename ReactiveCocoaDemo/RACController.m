@@ -4,9 +4,7 @@
 //
 //  Created by 符现超 on 15/8/22.
 //  Copyright (c) 2015年 zd. All rights reserved.
-//  信号演示网站：
-//  http://rxmarbles.com/
-//  http://neilpa.me/rac-marbles/
+//  信号演示网站：http://rxmarbles.com/    http://neilpa.me/rac-marbles/
 //  Reactive Cocoa 学习笔记：http://www.tuicool.com/articles/Yrim6zZ
 
 
