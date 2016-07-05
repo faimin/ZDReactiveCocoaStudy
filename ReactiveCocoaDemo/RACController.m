@@ -34,7 +34,7 @@
     // Do any additional setup after loading the view, typically from a nib.
 
     [self signals];
-    [self actions];
+    //[self actions];
 }
 
 - (void)didReceiveMemoryWarning
@@ -48,6 +48,8 @@
 
 - (void)signals
 {
+    //[self map];
+    
     //[self combineLatestReduce];
     
     //[self zip];
@@ -130,6 +132,28 @@
         NSString *str = FORMATSTRING(@"%@%@", str1, str2);
         LxPrintf(@"%@,\n %@", x, str);
     }];
+}
+
+- (void)map
+{
+    RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"map1"];
+        [subscriber sendCompleted];
+        return [RACDisposable disposableWithBlock:^{
+            LxPrintAnything(释放了);
+        }];
+    }];
+    
+    // sendNext后会执行订阅block
+    [[signal map:^id(id value) {
+        NSString *newString = FORMATSTRING(@"%@, hello world!", value);
+        LxDBAnyVar(newString);
+        return value;
+    }] subscribeNext:^(id x) {
+        LxDBAnyVar(x);
+    }];
+    
+    
 }
 
 ///  把多个信号合并成一个信号，任何一个信号有新值的时候就会调用，它会按照时间的先后顺序把信号排列起来

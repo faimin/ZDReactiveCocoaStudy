@@ -11,9 +11,7 @@
 
 
 @interface PushController ()
-
 @property (weak, nonatomic) IBOutlet UIButton *okButton;
-
 @end
 
 @implementation PushController

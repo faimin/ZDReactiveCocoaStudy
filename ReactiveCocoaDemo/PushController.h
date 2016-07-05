@@ -12,7 +12,5 @@
 static NSString *const kNotification = @"notification";
 
 @interface PushController : UIViewController
-
 @property (nonatomic, strong) RACCommand *command;
-
 @end
