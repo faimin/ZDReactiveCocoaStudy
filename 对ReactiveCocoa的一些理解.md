@@ -1,6 +1,6 @@
 ###对ReactiveCocoa的一些理解
 ####flattenMap与map
-* 推荐文章：**[RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe)**
+* 推荐文章：**[RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe) && [细说ReactiveCocoa的冷信号与热信号（三）：怎么处理冷信号与热信号](http://tech.meituan.com/talk-about-reactivecocoas-cold-signal-and-hot-signal-part-3.html)**
 
 本文好多是参考刚才的推荐文章来理解的，在此感谢**godyZ**。
 > 
@@ -30,7 +30,7 @@
           [subscriber sendCompleted];
       }];
 
-   return nil
+   	return nil;
   }];
 }
 ```
@@ -87,5 +87,23 @@
 }
 ```
 
+#### （摘自美团）简单分析一下 `- (RACMulticastConnection *)multicast:(RACSubject *)subject;`方法：
+* 1、当 `RACSignal` 类的实例调用 `- (RACMulticastConnection *)multicast:(RACSubject *)subject` 时，以 `self` 和 `subject` 作为构造参数创建一个 `RACMulticastConnection` 实例。
+* 2、`RACMulticastConnection` 构造的时候，保存 `source` 和 `subject` 作为成员变量，创建一个 `RACSerialDisposable` 对象，用于取消订阅。
+* 3、当 `RACMulticastConnection` 类的实例调用 `- (RACDisposable *)connect` 这个方法的时候，判断是否是第一次。如果是的话 用 `_signal` 这个成员变量来订阅 `sourceSignal` 之后返回 `self.serialDisposable` ,否则直接返回 `self.serialDisposable` 。这里面订阅 `sourceSignal` 是重点。
+* 4、`RACMulticastConnection` 的 `signal` 只读属性，就是一个热信号，订阅这个热信号就避免了各种副作用的问题。它会在 `- (RACDisposable *)connect` 第一次调用后，根据 sourceSignal 的订阅结果来传递事件。
+* 5、想要确保第一次订阅就能成功订阅 `sourceSignal` ，可以使用 `- (RACSignal *)autoconnect` 这个方法，它保证了第一个订阅者触发 `sourceSignal` 的订阅，也保证了当返回的信号所有订阅者都关闭连接后 `sourceSignal` 被正确关闭连接。
 
+----
+#### 附：`ReactiveCocoa`和`RxSwift` API图，引用自[FRPCheatSheeta](https://github.com/aiqiuqiu/FRPCheatSheeta)
+>
+**ReactiveCocoa-Objc**
+----
+![ReactiveCocoa-Objc](http://ww1.sinaimg.cn/large/006tNbRwjw1f69ss3l0y4j31jf1cpwtm.jpg)
+**ReactiveCocoa-Swift**
+----
+![ReactiveCocoaV4.x-Swift.png](http://ww4.sinaimg.cn/large/006tNbRwjw1f69u9n630vj31kw10nk1g.jpg)
+**RxSwift**
+----
+![RXSwift.png](http://ww2.sinaimg.cn/large/006tNbRwjw1f69u2fugtjj317k1n1tis.jpg)
 

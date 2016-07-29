@@ -375,7 +375,7 @@
 
 // http://blog.sunnyxx.com/2014/04/19/rac_4_filters/
 
-///  忽略给定的值，注意，这里忽略的既可以是地址相同的对象，也可以是-
+/// 忽略给定的值，注意，这里忽略的既可以是地址相同的对象，也可以是-
 /// isEqual:结果相同的值，也就是说自己写的Model对象可以通过重写-
 /// isEqual:方法来使- ignore:生效。
 - (void)ignore
@@ -392,7 +392,7 @@
 }
 
 ///  @brief
-/// 跳过：它会把第三条数据之前的所有数据都跳过，然后只输出第四条极其后面的数据，下面的输出结果为4，5（一次输出一条数据）
+///  跳过：它会把第三条数据之前的所有数据都跳过，然后只输出第四条极其后面的数据，下面的输出结果为4，5（一次输出一条数据）
 ///  - skipUntilBlock:(BOOL (^)(id x))
 ///  和- takeUntilBlock:同理，一直跳，直到block为YES
 ///  - skipWhileBlock:(BOOL (^)(id x))
@@ -510,7 +510,7 @@
                                             LxDBAnyVar(@"你好");
                                         }];
 
-    // 2. 每个一定长度时间做一件事
+    // 2. 每隔一段时间执行一次
     [[[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]]
       takeUntil:self.rac_willDeallocSignal]
       subscribeNext:^(NSDate *date) {
