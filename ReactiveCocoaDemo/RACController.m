@@ -48,6 +48,8 @@
 
 - (void)signals
 {
+    [self flatten];
+    
     //[self map];
     
     //[self combineLatestReduce];
@@ -134,6 +136,34 @@
     }];
 }
 
+- (void)flatten
+{
+    RACSignal *signal1 = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"flatten"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    RACSignal *signal2 = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:signal1];
+        [subscriber sendCompleted];
+        return [RACDisposable disposableWithBlock:^{
+            NSLog(@"dispose");
+        }];
+    }] replay];
+    
+    [[signal2 map:^id(id value) {
+        NSLog(@"%@", value); // 最终变为中间信号
+        return value;
+    }] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
+    
+    [[signal2 flatten] subscribeNext:^(id x) {
+        NSLog(@"%@", x);    // 最终变为中间信号
+    }];
+}
+
 - (void)map
 {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -152,8 +182,6 @@
     }] subscribeNext:^(id x) {
         LxDBAnyVar(x);
     }];
-    
-    
 }
 
 ///  把多个信号合并成一个信号，任何一个信号有新值的时候就会调用，它会按照时间的先后顺序把信号排列起来
