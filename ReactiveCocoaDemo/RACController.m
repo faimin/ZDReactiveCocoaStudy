@@ -609,8 +609,7 @@
     }];
 }
 
-
-/// 当signalA和signalB都至少sendNext过一次，接下来只要其中任意一个signal有了新的内容，doA:withB这个方法就会自动被触发。
+/// 当signalA和signalB都至少sendNext过一次，接下来只要其中任意一个signal有了新的内容，doA:withB这个方法就会自动被触发，withSignals:有几个signal，liftselector的选择子中就会有几个参数。
 - (void)liftSelector
 {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
