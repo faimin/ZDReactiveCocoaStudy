@@ -17,6 +17,8 @@
 #define FORMATSTRING(FORMAT, ...)                   \
   ([NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
 
+#define MovieAPI    @"http://api.douban.com/v2/movie/top250"
+#define WeatherAPI  @"http://www.weather.com.cn/data/cityinfo/101010100.html"
 
 @interface RACController ()
 
@@ -32,7 +34,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-
+    
     [self signals];
     //[self actions];
 }
@@ -76,7 +78,15 @@
     
     //[self throttle];
     
-    [self collect];
+    //[self swithToLatest];
+    
+    //[self materialize];
+    
+    //[self liftSelector];
+    
+    //[self collect];
+    
+    [self scan];
 }
 
 #pragma mark - Functions
@@ -612,18 +622,44 @@
 /// 当signalA和signalB都至少sendNext过一次，接下来只要其中任意一个signal有了新的内容，doA:withB这个方法就会自动被触发，withSignals:有几个signal，liftselector的选择子中就会有几个参数。
 - (void)liftSelector
 {
+//    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//            [subscriber sendNext:@"A"];
+//        });
+//        return nil;
+//    }];
+//    
+//    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+//        [subscriber sendNext:@"B"];
+//        [subscriber sendNext:@"Another B"];
+//        [subscriber sendCompleted];
+//        return nil;
+//    }];
+    
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [subscriber sendNext:@"A"];
-        });
-        return nil;
+        NSURLSessionTask *task = [[ZDAFNetWorkHelper shareInstance] requestWithURL:MovieAPI params:nil httpMethod:HttpMethod_Get success:^(id  _Nullable responseObject) {
+            [subscriber sendNext:responseObject];
+            [subscriber sendCompleted];
+        } failure:^(NSError * _Nonnull error) {
+            [subscriber sendError:error];
+        }];
+        
+        return [RACDisposable disposableWithBlock:^{
+            [task cancel];
+        }];
     }];
     
     RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        [subscriber sendNext:@"B"];
-        [subscriber sendNext:@"Another B"];
-        [subscriber sendCompleted];
-        return nil;
+        NSURLSessionTask *task = [[ZDAFNetWorkHelper shareInstance] requestWithURL:WeatherAPI params:nil httpMethod:HttpMethod_Get success:^(id  _Nullable responseObject) {
+            [subscriber sendNext:responseObject];
+            [subscriber sendCompleted];
+        } failure:^(NSError * _Nonnull error) {
+            [subscriber sendError:error];
+        }];
+        
+        return [RACDisposable disposableWithBlock:^{
+            [task cancel];
+        }];
     }];
     
     [self rac_liftSelector:@selector(doA:withB:) withSignals:signalA, signalB, nil];
@@ -642,11 +678,25 @@
     
     [[[numbers map:^id(NSNumber *value) {
         return arrayOfSignal[value.integerValue];
-    }] collect] subscribeNext:^(NSArray *array) {
+    }] collect] subscribeNext:^(NSArray<RACSignal *> *array) {
         NSLog(@"%@, %@", [array class], array);
     } completed:^{
         NSLog(@"completed");
     }];
+}
+
+/// 该操作可将上次reduceBlock处理后输出的结果作为参数，传入当次reduceBlock操作，往往用于信号输出值的聚合处理。
+- (void)scan
+{
+    /// 下面的例子，第一次会拿到start：0作为上一次的值和新值1，相加=1，第二次执行时会拿到上次的1和新值2，相加=3，然后第三次拿到3和新值3，然后再相加=6...，所以最终依次4次print 1，3，6，10。
+    RACSequence *numbers = @[ @1, @2, @3, @4 ].rac_sequence;
+    
+    // Contains 1, 3, 6, 10
+    RACSequence *sums = [numbers scanWithStart:@0 reduce:^(NSNumber *sum, NSNumber *next) {
+        return @(sum.integerValue + next.integerValue);
+    }];
+    
+    NSLog(@"%@", sums.array);
 }
 
 #pragma mark - Search
@@ -682,12 +732,12 @@
         self.myLabel.text = self.textField.text;
         return [RACSignal empty];
     }];
-    
 }
 
-- (void)doA:(NSString *)A withB:(NSString *)B
+// a和b分别为信号发送的信息
+- (void)doA:(id)a withB:(id)b
 {
-    NSLog(@"A:%@ and B:%@", A, B);
+    NSLog(@"A:%@ and B:%@", a, b);
 }
 
 #pragma mark - 跳转

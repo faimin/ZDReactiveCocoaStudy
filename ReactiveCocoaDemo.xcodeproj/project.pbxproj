@@ -15,6 +15,7 @@
 		BC1E46C71B88B99700838AEF /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BC1E46C61B88B99700838AEF /* Images.xcassets */; };
 		BC1E46CA1B88B99700838AEF /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC1E46C81B88B99700838AEF /* LaunchScreen.xib */; };
 		BC1E46D61B88B99700838AEF /* ReactiveCocoaDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46D51B88B99700838AEF /* ReactiveCocoaDemoTests.m */; };
+		BC486D231D4F021C00F6C53B /* TableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC486D221D4F021C00F6C53B /* TableViewController.m */; };
 		BC82FCA81C2ABC6B0095E665 /* CommandController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC82FCA71C2ABC6B0095E665 /* CommandController.m */; };
 		BCE3E4371C2C0B47000A343A /* PushController.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE3E4361C2C0B47000A343A /* PushController.m */; };
 		BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */; };
@@ -49,6 +50,8 @@
 		BC1E46CF1B88B99700838AEF /* ReactiveCocoaDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReactiveCocoaDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC1E46D41B88B99700838AEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC1E46D51B88B99700838AEF /* ReactiveCocoaDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactiveCocoaDemoTests.m; sourceTree = "<group>"; };
+		BC486D211D4F021C00F6C53B /* TableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewController.h; sourceTree = "<group>"; };
+		BC486D221D4F021C00F6C53B /* TableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewController.m; sourceTree = "<group>"; };
 		BC82FCA61C2ABC6B0095E665 /* CommandController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandController.h; sourceTree = "<group>"; };
 		BC82FCA71C2ABC6B0095E665 /* CommandController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandController.m; sourceTree = "<group>"; };
 		BCE3E4351C2C0B47000A343A /* PushController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushController.h; sourceTree = "<group>"; };
@@ -125,6 +128,8 @@
 			children = (
 				BC1E46BD1B88B99700838AEF /* AppDelegate.h */,
 				BC1E46BE1B88B99700838AEF /* AppDelegate.m */,
+				BC486D211D4F021C00F6C53B /* TableViewController.h */,
+				BC486D221D4F021C00F6C53B /* TableViewController.m */,
 				BC1E46C01B88B99700838AEF /* RACController.h */,
 				BC1E46C11B88B99700838AEF /* RACController.m */,
 				BCE3E4351C2C0B47000A343A /* PushController.h */,
@@ -333,6 +338,7 @@
 				BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */,
 				BC1E46BC1B88B99700838AEF /* main.m in Sources */,
 				BC82FCA81C2ABC6B0095E665 /* CommandController.m in Sources */,
+				BC486D231D4F021C00F6C53B /* TableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
