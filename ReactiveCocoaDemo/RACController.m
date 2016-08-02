@@ -487,6 +487,19 @@
 ///  注意，这个操作应该出现在Signal有终止条件的的情况下，如rac_textSignal这样除dealloc外没有终止条件的Signal上就不太可能用到。
 - (void)ignoreValues
 {
+    RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@1];
+        [subscriber sendNext:@2];
+        [subscriber sendNext:@13];
+        [subscriber sendNext:@4];
+        [subscriber sendNext:@2];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    [[signal ignoreValues] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
 }
 
 ///  @brief
@@ -522,11 +535,10 @@
     }];
 }
 
-/// take与skip相反，它是取take的前几条数据
+/// take与skip相反，它是取take的前几条数据，take:参数必须是>0的数
 - (void)take
 {
-    RACSignal *signal =
-    [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+    RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"你好"];
         [subscriber sendNext:@1];
         [subscriber sendNext:@2];

@@ -16,6 +16,7 @@
 		BC1E46CA1B88B99700838AEF /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = BC1E46C81B88B99700838AEF /* LaunchScreen.xib */; };
 		BC1E46D61B88B99700838AEF /* ReactiveCocoaDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46D51B88B99700838AEF /* ReactiveCocoaDemoTests.m */; };
 		BC486D231D4F021C00F6C53B /* TableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC486D221D4F021C00F6C53B /* TableViewController.m */; };
+		BC486D3A1D50725A00F6C53B /* RACSignal+Extend.m in Sources */ = {isa = PBXBuildFile; fileRef = BC486D391D50725A00F6C53B /* RACSignal+Extend.m */; };
 		BC82FCA81C2ABC6B0095E665 /* CommandController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC82FCA71C2ABC6B0095E665 /* CommandController.m */; };
 		BCE3E4371C2C0B47000A343A /* PushController.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE3E4361C2C0B47000A343A /* PushController.m */; };
 		BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */; };
@@ -52,6 +53,8 @@
 		BC1E46D51B88B99700838AEF /* ReactiveCocoaDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactiveCocoaDemoTests.m; sourceTree = "<group>"; };
 		BC486D211D4F021C00F6C53B /* TableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewController.h; sourceTree = "<group>"; };
 		BC486D221D4F021C00F6C53B /* TableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewController.m; sourceTree = "<group>"; };
+		BC486D381D50725A00F6C53B /* RACSignal+Extend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RACSignal+Extend.h"; sourceTree = "<group>"; };
+		BC486D391D50725A00F6C53B /* RACSignal+Extend.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RACSignal+Extend.m"; sourceTree = "<group>"; };
 		BC82FCA61C2ABC6B0095E665 /* CommandController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CommandController.h; sourceTree = "<group>"; };
 		BC82FCA71C2ABC6B0095E665 /* CommandController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandController.m; sourceTree = "<group>"; };
 		BCE3E4351C2C0B47000A343A /* PushController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushController.h; sourceTree = "<group>"; };
@@ -126,6 +129,7 @@
 		BC1E46B81B88B99700838AEF /* ReactiveCocoaDemo */ = {
 			isa = PBXGroup;
 			children = (
+				BC486D371D50723300F6C53B /* Category */,
 				BC1E46BD1B88B99700838AEF /* AppDelegate.h */,
 				BC1E46BE1B88B99700838AEF /* AppDelegate.m */,
 				BC486D211D4F021C00F6C53B /* TableViewController.h */,
@@ -168,6 +172,15 @@
 				BC1E46D41B88B99700838AEF /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		BC486D371D50723300F6C53B /* Category */ = {
+			isa = PBXGroup;
+			children = (
+				BC486D381D50725A00F6C53B /* RACSignal+Extend.h */,
+				BC486D391D50725A00F6C53B /* RACSignal+Extend.m */,
+			);
+			path = Category;
 			sourceTree = "<group>";
 		};
 		BCFE56881C25CD7F00DD5604 /* ZDAFNetWorkHelper */ = {
@@ -334,6 +347,7 @@
 				BC1E46C21B88B99700838AEF /* RACController.m in Sources */,
 				BCE3E4371C2C0B47000A343A /* PushController.m in Sources */,
 				05671AF21D1AFDCC00A2BAAB /* 对ReactiveCocoa的一些理解.md in Sources */,
+				BC486D3A1D50725A00F6C53B /* RACSignal+Extend.m in Sources */,
 				BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */,
 				BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */,
 				BC1E46BC1B88B99700838AEF /* main.m in Sources */,
