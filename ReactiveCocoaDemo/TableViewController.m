@@ -43,7 +43,8 @@
                   @"liftSelector",
                   @"collect",
                   @"scanWithStart",
-                  @"combinePreviousWithStart"
+                  @"combinePreviousWithStart",
+                  @"aggregate"
                   ];
 }
 

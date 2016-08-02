@@ -133,6 +133,9 @@
         case 25:
             [self combinePreviousWithStart];
             break;
+        case 26:
+            [self aggregate];
+            break;
         default:
             break;
     }
@@ -628,36 +631,6 @@
     }];
 }
 
-// MARK：把网络请求改成信号控制
-//- (RACSignal *)getUserByEmail:(NSString *)email {
-//    return [RACSignal createSignal:^(id<RACSubscriber> subscriber) {
-//        NSString *path = @"https://your.server.address/api/user";
-//        NSDictionary *params = @{ @"email":email };
-//
-//        NSURLSessionDataTask *task = [self dataTaskWithHTTPMethod:@"GET"
-//        URLString:path parameters:params success:^(NSURLSessionDataTask *task,
-//        id responseObject) {
-//            NSError *error = nil;
-//            User *user = [MTLJSONAdapter modelOfClass:[User class]
-//            fromJSONDictionary:responseObject error:&error];
-//            if (error) {
-//                [subscriber sendError:error];
-//            } else {
-//                [subscriber sendNext:user];
-//                [subscriber sendCompleted];
-//            }
-//        } failure:^(NSURLSessionDataTask *task, NSError *error) {
-//            [subscriber sendError:error];
-//        }];
-//
-//        [task resume];
-//
-//        return [RACDisposable disposableWithBlock:^{
-//            [task cancel];
-//        }];
-//    }];
-//}
-
 /// 它接收一个时间间隔interval作为参数，如果Signal发出的next事件之后interval时间内不再发出next事件，那么它返回的Signal会将这个next事件发出。也就是说，这个方法会将发送比较频繁的next事件舍弃，只保留一段“静默”时间之前的那个next事件.
 /// 这个方法常用于处理输入框等信号（用户打字很快），因为它只保留用户最后输入的文字并返回一个新的Signal，将最后的文字作为next事件参数发出。
 ///
@@ -760,7 +733,7 @@
 /// 该操作可将上次reduceBlock处理后输出的结果作为参数，传入当次reduceBlock操作，往往用于信号输出值的聚合处理。
 - (void)scanWithStart
 {
-    // 下面的例子，第一次会拿到start：0作为上一次的值和新值1相加=1，第二次执行时会拿到上次的1和新值2相加=3，然后第三次拿到3和新值3，然后再相加=6...，所以最终依次4次print 1，3，6，10。
+    // 下面的例子，第一次会拿到start：0作为上一次的值和新值1相加=1，然后把这个reduce后的结果放入数组中，第二次执行时会拿到上次的1和新值2相加=3，然后把第二次reduce的结果放入数组中，第三次拿到3和新值3，然后再相加=6...，所以最终print一个装有 1，3，6，10的数组。
     RACSequence *numbers = @[ @1, @2, @3, @4 ].rac_sequence;
     // Contains 1, 3, 6, 10
     RACSequence *sums = [numbers scanWithStart:@0 reduce:^(NSNumber *sum, NSNumber *next) {
@@ -784,6 +757,19 @@
     NSLog(@"%@", sequeue.array);
 }
 
+- (void)aggregate
+{
+    RACSignal *numbers = @[@(0), @(1), @(2)].rac_sequence.signal;
+    [[numbers aggregateWithStartFactory:^id{
+        return [[NSMutableArray alloc] init];
+    } reduce:^id(NSMutableArray *running, id next) {
+        [running addObject:next ?: [NSNull null]];
+        return running;
+    }] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
+}
+
 #pragma mark - Search
 
 - (void)search
@@ -802,7 +788,7 @@
                   }];
             }];
     }] switchToLatest] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 }
 
@@ -837,7 +823,7 @@
                 [subscriber sendNext:@(++i)];
                 [subscriber sendCompleted];
                 return [RACDisposable disposableWithBlock:^{
-                    LxPrintAnything(点击按钮信号释放了);
+                    NSLog(@"点击按钮信号释放了");
                 }];
             }];
         }];
@@ -857,7 +843,7 @@
       
         [pushVC.command.executing subscribeNext:^(id x) {
             NSString *result = ([x integerValue] == 1) ? @"执行中" : @"未执行";
-            LxDBAnyVar(result);
+            NSLog(@"%@", result);
         }];
       
     }
