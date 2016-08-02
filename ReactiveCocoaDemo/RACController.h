@@ -10,4 +10,5 @@
 
 @interface RACController : UIViewController
 @property (weak, nonatomic) IBOutlet UILabel *myLabel;
+@property (nonatomic, assign) NSUInteger type;
 @end

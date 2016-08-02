@@ -53,7 +53,7 @@
                                 </connections>
                             </tableView>
                         </subviews>
-                        <color key="backgroundColor" red="0.0" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" red="0.5" green="0.0" blue="0.5" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
                             <constraint firstItem="TmO-B6-sUS" firstAttribute="top" secondItem="Rce-SU-W5L" secondAttribute="bottom" id="93d-dZ-F8T"/>
                             <constraint firstAttribute="trailing" secondItem="TmO-B6-sUS" secondAttribute="trailing" id="Gjc-3A-O7m"/>
@@ -258,6 +258,7 @@
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="0n9-xA-wZJ">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="barTintColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
@@ -339,7 +340,7 @@
         <!--Tab Bar Controller-->
         <scene sceneID="ebm-HC-9jC">
             <objects>
-                <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="ykx-XL-SWQ" sceneMemberID="viewController">
+                <tabBarController automaticallyAdjustsScrollViewInsets="NO" modalTransitionStyle="flipHorizontal" id="ykx-XL-SWQ" sceneMemberID="viewController">
                     <toolbarItems/>
                     <tabBar key="tabBar" contentMode="scaleToFill" id="hyI-rm-0Yt">
                         <autoresizingMask key="autoresizingMask"/>

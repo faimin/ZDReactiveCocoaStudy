@@ -30,6 +30,10 @@
 
 @implementation RACController
 
+- (void)dealloc {
+    NSLog(@"%s, %d", __PRETTY_FUNCTION__, __LINE__);
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -50,43 +54,88 @@
 
 - (void)signals
 {
-    [self flatten];
-    
-    //[self map];
-    
-    //[self combineLatestReduce];
-    
-    //[self zip];
-
-    //[self merge];
-
-    //[self skip];
-
-    //[self take];
-
-    //[self concat];
-    
-    //[self then];
-
-    //[self replay];
-
-    //[self replay1];
-
-    //[self replayLazily];
-
-    //[self deliverOn];
-    
-    //[self throttle];
-    
-    //[self swithToLatest];
-    
-    //[self materialize];
-    
-    //[self liftSelector];
-    
-    //[self collect];
-    
-    [self scan];
+    switch (self.type) {
+        case 0:
+            [self combineLatestReduce];
+            break;
+        case 1:
+            [self flattenMap];
+            break;
+        case 2:
+            [self flatten];
+            break;
+        case 3:
+            [self map];
+            break;
+        case 4:
+            [self zip];
+            break;
+        case 5:
+            [self merge];
+            break;
+        case 6:
+            [self concat];
+            break;
+        case 7:
+            [self then];
+            break;
+        case 8:
+            [self replay1];
+            break;
+        case 9:
+            [self replayLazily];
+            break;
+        case 10:
+            [self mutableConnection];
+            break;
+        case 11:
+            [self deliverOn];
+            break;
+        case 12:
+            [self distinctUntilChanged];
+            break;
+        case 13:
+            [self throttle];
+            break;
+        case 14:
+            [self ignore];
+            break;
+        case 15:
+            [self ignoreValues];
+            break;
+        case 16:
+            [self skip];
+            break;
+        case 17:
+            [self take];
+            break;
+        case 18:
+            [self takeUntil];
+            break;
+        case 19:
+            [self timer];
+            break;
+        case 20:
+            [self swithToLatest];
+            break;
+        case 21:
+            [self materialize];
+            break;
+        case 22:
+            [self liftSelector];
+            break;
+        case 23:
+            [self collect];
+            break;
+        case 24:
+            [self scanWithStart];
+            break;
+        case 25:
+            [self combinePreviousWithStart];
+            break;
+        default:
+            break;
+    }
 }
 
 #pragma mark - Functions
@@ -146,10 +195,15 @@
     }];
 }
 
+- (void)flattenMap
+{
+
+}
+
 - (void)flatten
 {
     RACSignal *signal1 = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        [subscriber sendNext:@"flatten"];
+        [subscriber sendNext:@"测试flatten函数"];
         [subscriber sendCompleted];
         return nil;
     }];
@@ -170,7 +224,7 @@
     }];
     
     [[signal2 flatten] subscribeNext:^(id x) {
-        NSLog(@"%@", x);    // 最终变为中间信号
+        NSLog(@"%@", x);   
     }];
 }
 
@@ -199,6 +253,7 @@
 ///  区别：每次merge返回的是单一的信号，不能组合，而combineLatest可以把最新返回的信号跟另一个信号进行组合，另一个信号是它的上次的那个信号。可以简单理解成combineLatest可以组合，而merge却不行
 - (void)merge
 {
+    // 看源码可知，merge是把几个信号顺序放入到一个数组中，然后放入一个新的信号中，当这个新的信号被订阅时，数组中的信号会被订阅者依次订阅，由于这是信号中的信号，所以最后做了依次flatten操作，取出其中的值。
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
         [subscriber sendNext:@"2"];
@@ -208,14 +263,19 @@
     
     RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"3"];
-        //[subscriber sendNext:@"4"];
+        [subscriber sendNext:@"4"];
         [subscriber sendCompleted];
         return nil;
     }];
     
-    [[signalA merge:signalB] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+    // 依次print 1，2，3，4
+    [[RACSignal merge:@[signalA, signalB]] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
     }];
+//    or:
+//    [[signalA merge:signalB] subscribeNext:^(NSString *x) {
+//        NSLog(@"%@", x);
+//    }];
 }
 
 ///  @brief  压缩: 把两个信号中的数据连到一起，生成一个RACTuple，[A
@@ -686,17 +746,30 @@
 }
 
 /// 该操作可将上次reduceBlock处理后输出的结果作为参数，传入当次reduceBlock操作，往往用于信号输出值的聚合处理。
-- (void)scan
+- (void)scanWithStart
 {
-    /// 下面的例子，第一次会拿到start：0作为上一次的值和新值1，相加=1，第二次执行时会拿到上次的1和新值2，相加=3，然后第三次拿到3和新值3，然后再相加=6...，所以最终依次4次print 1，3，6，10。
+    // 下面的例子，第一次会拿到start：0作为上一次的值和新值1相加=1，第二次执行时会拿到上次的1和新值2相加=3，然后第三次拿到3和新值3，然后再相加=6...，所以最终依次4次print 1，3，6，10。
     RACSequence *numbers = @[ @1, @2, @3, @4 ].rac_sequence;
-    
     // Contains 1, 3, 6, 10
     RACSequence *sums = [numbers scanWithStart:@0 reduce:^(NSNumber *sum, NSNumber *next) {
         return @(sum.integerValue + next.integerValue);
     }];
     
     NSLog(@"%@", sums.array);
+}
+
+- (void)combinePreviousWithStart
+{
+    // 这个和上面的不一样，这个函数不会把reduce后的结果放入队列里作为previous。
+    // 看源码可以知道，它是把reduce后的结果和next的值打包进tuple中，然后把next的值返回来作为下一次的previous值（即：其实每次在reduce里拿到的previous都是数组中的上一个元素，而不是上次reduce出来的新值），map函数处理后把reduce的值作为最终结果。
+    // 所以下面的执行操作其实是：0+1，1+2，2+3，3+4
+    RACSequence *numbers = @[ @1, @2, @3, @4 ].rac_sequence;
+    // Contains 1, 3, 5, 7
+    RACSequence *sequeue = [numbers combinePreviousWithStart:@0 reduce:^id(NSNumber *previous, NSNumber *next) {
+        return @(previous.integerValue + next.integerValue);
+    }];
+    
+    NSLog(@"%@", sequeue.array);
 }
 
 #pragma mark - Search

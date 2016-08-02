@@ -19,23 +19,31 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.data = @[@"combineLatestReduce",
+                  @"flattenMap",
                   @"flatten",
                   @"map",
                   @"zip",
                   @"merge",
-                  @"skip",
-                  @"take",
                   @"concat",
                   @"then",
                   @"replay",
-                  @"replay1",
                   @"replayLazily",
+                  @"mutableConnection",
                   @"deliverOn",
+                  @"distinctUntilChanged",
                   @"throttle",
+                  @"ignore",
+                  @"ignoreValues",
+                  @"skip",
+                  @"take",
+                  @"takeUntil",
+                  @"timer",
                   @"switchToLatest",
                   @"materialize",
                   @"liftSelector",
-                  @"collect"
+                  @"collect",
+                  @"scanWithStart",
+                  @"combinePreviousWithStart"
                   ];
 }
 
@@ -77,6 +85,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     RACController *racController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:NSStringFromClass([RACController class])];
+    racController.type = indexPath.row;
 #ifdef NSFoundationVersionNumber_iOS_8_0
     [self.navigationController showViewController:racController sender:self];
 #else
