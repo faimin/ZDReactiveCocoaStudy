@@ -375,31 +375,36 @@
     RACSignal *signal = [letters replayLazily];
 
     [signal subscribeNext:^(id x) {
-        NSLog(@"S1:   %@", x);
+        NSLog(@"M1: %@", x);
     }];
 
     [letters sendNext:@"A"];
     [letters sendNext:@"B"];
 
     [signal subscribeNext:^(id x) {
-        NSLog(@"S2:   %@", x);
+        NSLog(@"P2:   %@", x);
+    }];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"L3:      %@", x);
     }];
 
-    //        [letters sendNext:@"C"];
-    //        [letters sendNext:@"D"];
-
-    //    [signal subscribeNext:^(id x) {
-    //        NSLog(@"S3:   %@", x);
-    //    }];
+//    [letters sendNext:@"C"];
+//    [letters sendNext:@"D"];
+//
+//    [signal subscribeNext:^(id x) {
+//        NSLog(@"S4:   %@", x);
+//    }];
 }
 
 - (void)replay1
 {
     RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"hello"];
+        [subscriber sendNext:@"world"];
         [subscriber sendCompleted];
         return [RACDisposable disposableWithBlock:^{
-            // TODO:
+            NSLog(@"订阅完成");
         }];
     }] replay];
 
@@ -411,6 +416,10 @@
 
     [signal subscribeNext:^(id x) {
         NSLog(@"2 == %@", x);
+    }];
+    
+    [signal subscribeNext:^(id x) {
+        NSLog(@"3 == %@", x);
     }];
 }
 
@@ -438,6 +447,9 @@
     }];
 }
 
+/// 信号被publish的真实操作看源码可知：创建一个`RACSubject`对象,
+/// 然后调用`multicast`方法,通过这个`subject`对象和`源信号`作为参数又创建了一个`RACMulticastConnection`对象,
+/// 
 - (void)mutableConnection
 {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -462,6 +474,18 @@
 ///  参数为RACScheduler类的对象scheduler，这个方法会返回一个Signal，它的所有事件都会传递给scheduler参数所表示的线程，而以前管道上的副作用还会在以前的线程上。这个方法主要是切换线程。
 - (void)deliverOn
 {
+    [[[RACSignal defer:^RACSignal *{
+        RACSubject *subject = [RACSubject subject];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSLog(@"1：当前是%@", [NSThread isMainThread] ? @"主线程" : @"子线程");
+            [subject sendNext:@"我被订阅了"];
+        });
+        return subject;
+    }]
+    deliverOn:[RACScheduler mainThreadScheduler]]
+    subscribeNext:^(id x) {
+        NSLog(@"2：%@ --> 当前是%@", x, [NSThread isMainThread] ? @"主线程" : @"子线程");
+    }];
 }
 
 ///  比较数值流中当前值和上一个值，如果不同，就返回当前值，简单理解为“流”的值有变化时反馈变化的值，求异存同。它将这一次的值与上一次做比较，当相同时（也包括-isEqual:）被忽略掉。

@@ -87,6 +87,7 @@
 {
     RACController *racController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:NSStringFromClass([RACController class])];
     racController.type = indexPath.row;
+    racController.navigationItem.title = self.data[indexPath.row];
 #ifdef NSFoundationVersionNumber_iOS_8_0
     [self.navigationController showViewController:racController sender:self];
 #else

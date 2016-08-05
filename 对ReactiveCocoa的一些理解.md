@@ -99,12 +99,15 @@
 
 ----
 
-##### （摘自美团）简单分析一下 `- (RACMulticastConnection *)multicast:(RACSubject *)subject;`方法：
+##### 简单分析一下 `- (RACMulticastConnection *)multicast:(RACSubject *)subject;`方法：
 * 1、当 `RACSignal` 类的实例调用 `- (RACMulticastConnection *)multicast:(RACSubject *)subject` 时，以 `self` 和 `subject` 作为构造参数创建一个 `RACMulticastConnection` 实例。
 * 2、`RACMulticastConnection` 构造的时候，保存 `source` 和 `subject` 作为成员变量，创建一个 `RACSerialDisposable` 对象，用于取消订阅。
-* 3、当 `RACMulticastConnection` 类的实例调用 `- (RACDisposable *)connect` 这个方法的时候，判断是否是第一次。如果是的话 用 `_signal` 这个成员变量来订阅 `sourceSignal` 之后返回 `self.serialDisposable` ,否则直接返回 `self.serialDisposable` 。这里面订阅 `sourceSignal` 是重点。
-* 4、`RACMulticastConnection` 的 `signal` 只读属性，就是一个热信号，订阅这个热信号就避免了各种副作用的问题。它会在 `- (RACDisposable *)connect` 第一次调用后，根据 sourceSignal 的订阅结果来传递事件。
+* 3、当 `RACMulticastConnection` 类的实例调用 `- (RACDisposable *)connect` 这个方法的时候，判断是否是第一次。如果是的话 用 `_signal` 这个成员变量（RACSubject类型）来订阅 `sourceSignal`， 之后返回 `self.serialDisposable`，否则直接返回 `self.serialDisposable` 。
+* 4、`RACMulticastConnection` 的 `signal` 只读属性，就是一个热信号，订阅这个热信号就避免了各种副作用的问题。它会在 `- (RACDisposable *)connect` 第一次调用后，根据 `sourceSignal` 的订阅结果来传递事件。
 * 5、想要确保第一次订阅就能成功订阅 `sourceSignal` ，可以使用 `- (RACSignal *)autoconnect` 这个方法，它保证了第一个订阅者触发 `sourceSignal` 的订阅，也保证了当返回的信号所有订阅者都关闭连接后 `sourceSignal` 被正确关闭连接。
+* 6、这里面订阅 `sourceSignal` 是重点，`_signal`是一个`RACSubject`类型，它里面维护着一个可变数组，每当它被订阅时，会把所有的**订阅者**保存到这个数组中。当`connection.signal`（即`_signal`）被订阅时，其实是`_signal`被订阅了，由于`_signal`是`RACSubject`类型对象，由于`_signal`也是信号，它里面重写了订阅方法，所以会执行它自己的`subscribe:`方法，执行此方法之前订阅者是`RACSubscriber`类型，但是在它的`subscribe:`方法中，它重新给订阅者赋了值，变为了`RACPassthroughSubscriber`类型，原来的`订阅者`和`信号`被`RACPassthroughSubscriber`实例保存了，所以数组中最终保存的是`RACPassthroughSubscriber`类型的订阅者，然后它发送消息的时候调的还是它持有的`subject`对象进行发送消息。
+* 7、当`RACMulticastConnection`调用`connect`方法时，源信号`sourceSignal`被`_signal`订阅，即执行`[sourceSignal subscribe:subject]`方法，然后执行订阅`subscribeNext:`block回调，在回调中执行`sendNext:`，由于订阅者是`RACSubject`类型的实例对象，它里面也会执行`sendNext:`方法，此方法中会遍历它的数组中的订阅者依次发送消息。
+* 8、`connect`时订阅者是`RACSubject`发送的`sendNext:`，源信号里的是`RACSubscriber`发送的`sendNext:`，所以不是死循环。
 
 ----
 #### 附：`ReactiveCocoa`和`RxSwift` API图，引用自[FRPCheatSheeta](https://github.com/aiqiuqiu/FRPCheatSheeta)
