@@ -136,6 +136,9 @@
         case 26:
             [self aggregate];
             break;
+        case 27:
+            [self bufferWithTime];
+            break;
         default:
             break;
     }
@@ -471,7 +474,7 @@
     [connection connect];
 }
 
-///  参数为RACScheduler类的对象scheduler，这个方法会返回一个Signal，它的所有事件都会传递给scheduler参数所表示的线程，而以前管道上的副作用还会在以前的线程上。这个方法主要是切换线程。
+/// 参数为RACScheduler类的对象scheduler，这个方法会返回一个Signal，它的所有事件都会传递给scheduler参数所表示的线程，而以前管道上的副作用还会在以前的线程上。这个方法主要是切换线程。
 - (void)deliverOn
 {
     [[[RACSignal defer:^RACSignal *{
@@ -488,7 +491,7 @@
     }];
 }
 
-///  比较数值流中当前值和上一个值，如果不同，就返回当前值，简单理解为“流”的值有变化时反馈变化的值，求异存同。它将这一次的值与上一次做比较，当相同时（也包括-isEqual:）被忽略掉。
+/// 比较数值流中当前值和上一个值，如果不同，就返回当前值，简单理解为“流”的值有变化时反馈变化的值，求异存同。它将这一次的值与上一次做比较，当相同时（也包括-isEqual:）被忽略掉。
 - (void)distinctUntilChanged
 {
     [[self.textField.rac_textSignal distinctUntilChanged] subscribeNext:^(id x) {
@@ -510,8 +513,8 @@
     }];
 }
 
-///  这个比较极端，忽略所有值，只关心Signal结束，也就是只取Comletion和Error两个消息，中间所有值都丢弃。
-///  注意，这个操作应该出现在Signal有终止条件的的情况下，如rac_textSignal这样除dealloc外没有终止条件的Signal上就不太可能用到。
+/// 这个比较极端，忽略所有值，只关心Signal结束，也就是只取Comletion和Error两个消息，中间所有值都丢弃。
+/// 注意，这个操作应该出现在Signal有终止条件的的情况下，如rac_textSignal这样除dealloc外没有终止条件的Signal上就不太可能用到。
 - (void)ignoreValues
 {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -781,6 +784,7 @@
     NSLog(@"%@", sequeue.array);
 }
 
+/// 聚合
 - (void)aggregate
 {
     RACSignal *numbers = @[@(0), @(1), @(2)].rac_sequence.signal;
@@ -790,6 +794,30 @@
         [running addObject:next ?: [NSNull null]];
         return running;
     }] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
+}
+
+/// 这个有点像collect,它也是把`sendNext`的所有结果放入一个数组中,然后以tuple结果延迟一次性全部发送;
+/// 不过这个有个地方需要注意的是,从源码可以看到,当订阅者发送`sendCompleted`消息时会立即执行源信号被订阅时346行位置的`completed:`里面的那个block,然后执行`sendCompleted`,然后`timerDisposable`会被dispose,这样那个延迟方法会失效(其实根本就不执行那个方法了)
+- (void)bufferWithTime
+{
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"1"];
+        [subscriber sendNext:@"2"];
+        //[subscriber sendCompleted];
+        return nil;
+    }];
+    
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"3"];
+        [subscriber sendNext:@"4"];
+        //[subscriber sendCompleted];
+        return nil;
+    }];
+    
+    // finally print 1，2，3，4
+    [[[RACSignal merge:@[signalA, signalB]] bufferWithTime:7 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id x) {
         NSLog(@"%@", x);
     }];
 }
