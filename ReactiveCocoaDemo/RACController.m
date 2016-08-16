@@ -12,7 +12,6 @@
 #import "PushController.h"
 #import <ReactiveCocoa/ReactiveCocoa.h>
 #import "ZDAFNetWorkHelper.h"
-#import <LxDBAnything.h>
 
 #define FORMATSTRING(FORMAT, ...)                   \
   ([NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
@@ -184,20 +183,20 @@
     
     [[RACSignal combineLatest:@[signalA, signalB, signalC] reduce:^id(NSString *a , NSString *b, NSString *c){
         NSString *resultString = [NSString stringWithFormat:@"\na = %@, b = %@, c = %@", a, b, c];
-        LxDBAnyVar(resultString);
+        NSLog(@"%@", resultString);
         return resultString;
     }] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
     
     [[RACSignal combineLatest:@[signalA, signalB]] subscribeNext:^(RACTuple *x) {
         RACSequence *seque = x.rac_sequence;
         NSArray *resultArray = seque.array;
-        LxDBAnyVar(resultArray);
+        NSLog(@"%@", resultArray);
         
         RACTupleUnpack(NSString *str1, NSString *str2) = x;
         NSString *str = FORMATSTRING(@"%@%@", str1, str2);
-        LxPrintf(@"%@,\n %@", x, str);
+        NSLog(@"%@,\n %@", x, str);
     }];
 }
 
@@ -240,17 +239,17 @@
         [subscriber sendNext:@"map1"];
         [subscriber sendCompleted];
         return [RACDisposable disposableWithBlock:^{
-            LxPrintAnything(释放了);
+            NSLog(@"释放了");
         }];
     }];
     
     // sendNext后会执行订阅block
     [[signal map:^id(id value) {
         NSString *newString = FORMATSTRING(@"%@, hello world!", value);
-        LxDBAnyVar(newString);
+        NSLog(@"%@", newString);
         return value;
     }] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 }
 
@@ -306,14 +305,14 @@
         [subscriber sendNext:@"2"];
         [subscriber sendCompleted];
         return [RACDisposable disposableWithBlock:^{
-           LxDBAnyVar(@"取消订阅signalA");
+           NSLog(@"取消订阅signalA");
         }];
     }];
 
     [[signalB zipWith:signalA] subscribeNext:^(id x) {
         RACTupleUnpack(NSString *str1, NSString *str2) = x;
         NSString *str = FORMATSTRING(@"%@%@", str1, str2);
-        LxPrintf(@"%@,\n %@", x, str);
+        NSLog(@"%@,\n %@", x, str);
     }];
 }
 
@@ -332,7 +331,7 @@
       [@"1 2 3 4 5 6 7 8 9" componentsSeparatedByString:@" "].rac_sequence;
 
     RACSequence *concat = [letters concat:numbers];
-    LxDBAnyVar([concat array]);
+    NSLog(@"%@", [concat array]);
     //print: ABCDEFGHI123456789
 }
 
@@ -358,7 +357,7 @@
     [[signalA then:^RACSignal *{
         return signalB;
     }] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 }
 
@@ -465,10 +464,10 @@
     
     RACSignal *connectSignal = connection.signal;
     [connectSignal subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
     [connectSignal subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
     
     [connection connect];
@@ -495,9 +494,9 @@
 - (void)distinctUntilChanged
 {
     [[self.textField.rac_textSignal distinctUntilChanged] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     } completed:^{
-        LxDBAnyVar(@"completed!!!!");
+        NSLog(@"completed!!!!");
     }];
 }
 
@@ -509,7 +508,7 @@
 - (void)ignore
 {
     [[self.textField.rac_textSignal ignore:@"123"] subscribeCompleted:^{
-        LxDBAnyVar(@"完成");
+        NSLog(@"完成");
     }];
 }
 
@@ -578,16 +577,16 @@
         [subscriber sendCompleted];
         // disposable在发送complete或者error消息后执行
         return [RACDisposable disposableWithBlock:^{
-            LxPrintAnything(执行disposable信号被销毁了);
+            NSLog(@"执行disposable信号被销毁了");
         }];
     }];
 
     [[signal take:3] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 
     [signal subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 }
 
@@ -635,9 +634,9 @@
     [[self.textField.rac_textSignal takeUntilBlock:^BOOL(NSString *text) {
         return [text isEqualToString:@"结束"];
     }] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     } completed:^{
-        LxDBAnyVar(@"完成");
+        NSLog(@"完成");
     }];
 }
 
@@ -647,14 +646,14 @@
     // 1. 延迟某个时间后再做某件事
     [[RACScheduler mainThreadScheduler] afterDelay:2
                                         schedule:^{
-                                            LxDBAnyVar(@"你好");
+                                            NSLog(@"你好");
                                         }];
 
     // 2. 每隔一段时间执行一次
     [[[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]]
       takeUntil:self.rac_willDeallocSignal]
       subscribeNext:^(NSDate *date) {
-          LxDBAnyVar(@"你好");
+          NSLog(@"你好");
     }];
 }
 
@@ -665,7 +664,7 @@
 - (void)throttle
 {
     [[[[self.textField.rac_textSignal ignore:@""] throttle:0.3] distinctUntilChanged] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 }
 
@@ -674,7 +673,7 @@
 - (void)swithToLatest
 {
     [[[[[self.textField.rac_textSignal ignore:@""] throttle:0.3] distinctUntilChanged] switchToLatest] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
+        NSLog(@"%@", x);
     }];
 }
 
@@ -883,14 +882,14 @@
         ///The executionSignals property of RACCommand is a signal that sends a next: every time the commands start executing. The argument is the signal created by the command. So it’s a signal of signals.
         ///There is an important details to note about the executionSignals property. The signals sent here do not include error events. For those there is a special errors property.
         [[pushVC.command.executionSignals concat] subscribeNext:^(id x) {
-            LxDBAnyVar(x);
+            NSLog(@"%@", x);
         }];
       
 //      [[pushVC.command.executionSignals map:^id(id value) {
-//          LxDBAnyVar(value);
+//          NSLog(@"%@", value);
 //          return value;
 //      }] subscribeNext:^(id x) {
-//          LxDBAnyVar(x);
+//          NSLog(@"%@", x);
 //      }];
       
         [pushVC.command.executing subscribeNext:^(id x) {
