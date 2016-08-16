@@ -7,7 +7,6 @@
 //
 
 #import "PushController.h"
-#import <LxDBAnything.h>
 
 
 @interface PushController ()
@@ -37,7 +36,7 @@
      *  必须要添加takeUntil来控制release信号，否则会出现内存泄露
      */
     [[[[NSNotificationCenter defaultCenter] rac_addObserverForName:kNotification object:nil] takeUntil:self.rac_willDeallocSignal] subscribeNext:^(NSNotification *x) {
-        LxDBAnyVar(x.object);
+        NSLog(@"%@", x.object);
     }];
 }
 
