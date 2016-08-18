@@ -1,450 +1,227 @@
+###对ReactiveCocoa中几个函数的解读
+####flattenMap与map
+>* 推荐文章：
+>* [RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe) 
+>* [细说ReactiveCocoa的冷信号与热信号（三）：怎么处理冷信号与热信号](http://tech.meituan.com/talk-about-reactivecocoas-cold-signal-and-hot-signal-part-3.html) 
 
+P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**godyZ**和**美团团队**。
 
-##1. RAC简介
-
-> * `Github`开源的一个应用于 iOS 和 OS X 开发的框架， 兼具 函数式编程 和 响应式编程 的特性。
-> * `Mattt Thompson` 大神 : 开启了一个新`Objective-C`纪元
-
-**解决问题：**
-传统iOS开发，消息传递、回调机制复杂等问题，使之清晰化，条理化
-
-**`Github`主页： **
-    [https://github.com/ReactiveCocoa/ReactiveCocoa](https://github.com/ReactiveCocoa/ReactiveCocoa)
-
-体积庞大：
-[https://github.com/ReactiveCocoa/ReactiveCocoa/tree/master/ReactiveCocoa/Objective-C](https://github.com/ReactiveCocoa/ReactiveCocoa/tree/master/ReactiveCocoa/Objective-C)
-
-用法：
-[https://github.com/ReactiveCocoa/ReactiveCocoa/tree/master/Documentation/Legacy](https://github.com/ReactiveCocoa/ReactiveCocoa/tree/master/Documentation/Legacy)
-
-> 最经典的示例：
-登录/注销需求：
-用户名、密码的长度均大于0，且当前尚未登录，登录按钮才可以点击（需要实时性地控制登录按钮是否可用的状态！）
-
-可以打印任何东西的宏：[https://github.com/DeveloperLx/LxDBAnything](https://github.com/DeveloperLx/LxDBAnything))
-
-
-##最常用的函数：
-**target-action：**
-
->* 文本框事件：
+>* `map`和`flatten`是基于`flattenMap`,而`flattenMap`是基于`bind:`,所以在此之前先来看看`bind`函数。
+>* 具体来看源码（为方便理解，去掉了源代码中`RACDisposable`, `@synchronized`, `@autoreleasepool`相关代码)。当新信号`N`被外部订阅时，会进入信号`N`的`didSubscribeBlock` (1)，之后订阅原信号`O` (2)，当原信号`O`有值输出后就用`bind`函数传入的`bindBlock`将其变换成中间信号`M` (3), 并马上对其进行订阅(4)，最后将中间信号`M`的输出作为新信号`N`的输出 (5)。即：当新生成的信号被订阅时，源信号也会立即被订阅。
 
 ```objc
-	UITextField * textField = [[UITextField alloc]init];
-    textField.backgroundColor = [UIColor cyanColor];
-    [self.view addSubview:textField];
-
-    @weakify(self); //  __weak __typeof__(self) self_weak_ = self;
-    
-    [textField mas_makeConstraints:^(MASConstraintMaker *make) {
+- (RACSignal *)bind:(RACStreamBindBlock (^)(void))block {
+    return [RACSignal createSignal:^(id<RACSubscriber> subscriber) { // (1)
+        RACStreamBindBlock bindingBlock = block(); // (MARK:此处执行block回调,生成一个bindingBlock)
         
-        @strongify(self);   //  __strong __typeof__(self) self = self_weak_;
-        make.size.mas_equalTo(CGSizeMake(180, 40));
-        make.center.equalTo(self.view);
-    }];
-    
-    [textField addTarget:self action:@selector(textChanged:) forControlEvents:UIControlEventEditingChanged];
-
-	- (void)textChanged:(UITextField *)textField
-	{
-	    LxDBAnyVar(textField);
-	}
-
-
-
-    [[textField rac_signalForControlEvents:UIControlEventEditingChanged]
-    subscribeNext:^(id x) {
-        LxDBAnyVar(x);
-    }];
-
-    [textField.rac_textSignal subscribeNext:^(id x) {
-        LxDBAnyVar(x);
-    }];
-    
-	Tip: id x -> NSString * text
-```
-
-
-
->* 手势：
-
-```objc
-	self.view.userInteractionEnabled = YES;
-    
-    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc]init];
-    [[tap rac_gestureSignal] subscribeNext:^(UITapGestureRecognizer * tap) {
-        LxDBAnyVar(tap);
-    }];
-    [self.view addGestureRecognizer:tap];
-```
-
-
-
->* 通知：(最简单)
-	
-```objc
-	// 不需要removeObserver
-	// 不要忘记添加takeUntil: 否则会出现observer未移除导致的内存泄露
-	[[[[NSNotificationCenter defaultCenter] rac_addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil] takeUntil:self.rac_willDeallocSignal] subscribeNext:^(NSNotification * notification) {
-        LxDBAnyVar(notification);
-    }];
-	
-```
-
->* 定时器：
-
-```objc
-	// 常用两种：
-	//1. 延迟某个时间后再做某件事
-
-	[[RACScheduler mainThreadScheduler]afterDelay:2 schedule:^{
-        LxPrintAnything(rac);
-    }];
-
-    //2. 每个一定长度时间做一件事
-
-    [[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(NSDate * date) {
-        LxDBAnyVar(date);
-    }];
-```
-
-
->* 代理：(有局限，只能取代没有返回值的代理方法)
-
-```objc
-    UIAlertView * alertView = [[UIAlertView alloc]initWithTitle:@"RAC" message:@"ReactiveCocoa" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Ensure", nil];
-    [[self rac_signalForSelector:@selector(alertView:clickedButtonAtIndex:) fromProtocol:@protocol(UIAlertViewDelegate)] subscribeNext:^(RACTuple * tuple) {
-        LxDBAnyVar(tuple);
-        
-        LxDBAnyVar(tuple.first);
-        LxDBAnyVar(tuple.second);
-        LxDBAnyVar(tuple.third);
-    }];
-    [alertView show];
-
-    //更简单的方式：
-    [[alertView rac_buttonClickedSignal] subscribeNext:^(id x) {
-        LxDBAnyVar(x);
-    }];
-
-```
-
-
->* KVO:
-
-```objc
-	UIScrollView * scrollView = [[UIScrollView alloc] init];
-    scrollView.delegate = (id<UIScrollViewDelegate>)self;
-    [self.view addSubview:scrollView];
-    
-    UIView * scrollViewContentView = [[UIView alloc] init];
-    scrollViewContentView.backgroundColor = [UIColor yellowColor];
-    [scrollView addSubview:scrollViewContentView];
-    
-    @weakify(self);
-    
-    [scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-        @strongify(self);
-          make.edges.equalTo(self.view).insets(UIEdgeInsetsMake(80, 80, 80, 80));
-    }];
-    
-    [scrollViewContentView mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        @strongify(self);
-        make.edges.equalTo(scrollView);
-        make.size.mas_equalTo(CGSizeMake(CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame)));
-    }];
-    
-    [RACObserve(scrollView, contentOffset) subscribeNext:^(id x) {
-        LxDBAnyVar(x);
-    }];
-
-    //（好处：写法简单，keypath有代码提示）
-```
-
-
-
-##进阶：
-
-####1.创建信号 & 激活信号 & 废弃信号 ：
-
-```objc
-    - (RACSignal *)loginSignal
-    {
-        return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [self subscribeNext:^(id x) {  // (2)
+            BOOL stop = NO;
+            id middleSignal = bindingBlock(x, &stop);  // (3) map与flatten结果不同，问题就出在这里
             
-            RACDisposable * schedulerDisposable = [[RACScheduler mainThreadScheduler] afterDelay:2 schedule:^{
-               
-                if (arc4random()%10 > 1) {
-                    
-                    [subscriber sendNext:@"Login response"];
+            if (middleSignal != nil) {
+                RACDisposable *disposable = [middleSignal subscribeNext:^(id x) { // (4)
+                    [subscriber sendNext:x];  // (5)
+                } error:^(NSError *error) {
+                    [subscriber sendError:error];
+                } completed:^{
                     [subscriber sendCompleted];
-                }
-                else {
-                    
-                    [subscriber sendError:[NSError errorWithDomain:@"LOGIN_ERROR_DOMAIN" code:444 userInfo:@{}]];
-                }
-            }];
-            
-            return [RACDisposable disposableWithBlock:^{
-                
-                [schedulerDisposable dispose];
-            }];
-        }];
-    }
-```
-
-** 经典示例：**
-
-```objc
-    - (RACSignal *)rac_addObserverForName:(NSString *)notificationName object:(id)object {
-        @unsafeify(object);
-        return [[RACSignal createSignal:^(id<RACSubscriber> subscriber) {
-            @strongify(object);
-            id observer = [self addObserverForName:notificationName object:object queue:nil usingBlock:^(NSNotification *note) {
-                [subscriber sendNext:note];
-            }];
-
-            return [RACDisposable disposableWithBlock:^{
-                [self removeObserver:observer];
-            }];
-        }] setNameWithFormat:@"-rac_addObserverForName: %@ object: <%@: %p>", notificationName, [object class], object];
-    }
-```
-
-
-####2.信号的处理：
-
-`map：`
-`filter:`
-`delay:`
-`startWith:`
-`timeout:`
-
-```objc
-    [[[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-       
-        [[RACScheduler mainThreadScheduler]afterDelay:3 schedule:^{
-           
-            [subscriber sendNext:@"rac"];
+                }];
+            }
+        } error:^(NSError *error) {
+            [subscriber sendError:error];
+        } completed:^{
             [subscriber sendCompleted];
         }];
         
-        return nil;
-    }] timeout:2 onScheduler:[RACScheduler mainThreadScheduler]]
-    subscribeNext:^(id x) {
-      
-        LxDBAnyVar(x);
-    } error:^(NSError *error) {
-        
-        LxDBAnyVar(error);
-    } completed:^{
-        
-        LxPrintAnything(completed);
+        return nil
     }];
+}
 ```
-`take:`
-`skip:`
-`takeLast:`
-`takeUntil:`
-`takeWhileBlock:`
-`skipWhileBlock:`
-`skipUntilBlock:`
 
-`throttle:`   (限流，即时搜索优化)
-`distinctUntilChanged:`
-`ignore:`
-`switchToLatest:`
+* `flattenMap`其实就是对`bind:`方法进行了一些安全检查，它最终返回的是`bindBlock`执行后生成的那个中间`signal`又被订阅后传递出的值的信号，而`map`方法返回的是`bindBlock`的执行结果生成的那个信号，没有再加工处理（即被订阅，再发送值）
 
 ```objc
-    UITextField * textField = [[UITextField alloc]init];
-    textField.backgroundColor = [UIColor cyanColor];
-    [self.view addSubview:textField];
-    
-    @weakify(self); 
-    
-    [textField mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        @strongify(self);  
-        make.size.mas_equalTo(CGSizeMake(180, 40));
-        make.center.equalTo(self.view);
-    }];
-    
-    [[[[[[textField.rac_textSignal throttle:0.3] distinctUntilChanged]ignore:@""] map:^id(id value) {
-        
-        return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-           
-            //  network request
-            [subscriber sendNext:value];
-            [subscriber sendCompleted];
-            
-            return [RACDisposable disposableWithBlock:^{
-                
-                //  cancel request
-            }];
-        }];
-    }] switchToLatest] subscribeNext:^(id x) {
-      
-        LxDBAnyVar(x);
-    }];
-```
+- (instancetype)flattenMap:(RACStream * (^)(id value))block {
+	Class class = self.class;
 
-`repeat:`
+	return [[self bind:^{
+		/// @return 返回的是RACStreamBindBlock
+		/// @discussion
+		///
+		/// 跟`bind：`方法中的代码对应起来如下：
+		/// BOOL stop = NO;
+     	/// id middleSignal = bindingBlock(x, &stop);
+     	///
+     	/// 与上面`bind:`函数中的(3)对应起来,
+     	/// 可以看出bindBlock中的x是原信号被subscribe后传出的值，即对应下面的value
+     	/// 也即flattenMap block中执行后传出的值，
+     	/// 即上面的(RACStream * (^ block)(id value))中的value
+     	/// flattenMap:后的那个block其实与bind:后的block基本是一样的，参数都是原信号发出的值，返回值都是RACStream，差别就是一个bool参数，所以说，flattenMap其实就是对bind方法进行了一些安全检查
+     	/// 综上所述：*flattenMap方法中传进来的那个block参数值就是原信号被订阅后发送的值*
+		return ^(id value, BOOL *stop) {
+			// 下面这个value并不是flattenMap后面block中的那个value（原信号被订阅后发出去的值），而是原信号发出的值被转换为中间信号后，又被订阅后发出去的值。
+			id stream = block(value) ?: [class empty];
+			NSCAssert([stream isKindOfClass:RACStream.class], @"Value returned from -flattenMap: is not a stream: %@", stream);
+
+			return stream;
+		};
+	}] setNameWithFormat:@"[%@] -flattenMap:", self.name];
+}
+```
+* `map`: 下面是`map`方法的源码，可以看出，`map`只是对`flattenMap`传出的`vaue`（即原信号传出的值）进行了`mapBlock`操作，并没有再进行订阅操作，即并不像`bind：`一样再次对原信号进行`bindBlock`后生成的中间信号进行订阅。
 
 ```objc
-		[[[[[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-       
-	        [subscriber sendNext:@"rac"];
-	        [subscriber sendCompleted];
-	        
-	        return nil;
-	    }]delay:1]repeat]take:3] subscribeNext:^(id x) {
-	       
-	        LxDBAnyVar(x);
-	    } completed:^{
-	      
-	        LxPrintAnything(completed);
-	    }];
+- (instancetype)map:(id (^)(id value))block {
+	NSCParameterAssert(block != nil);
+
+	Class class = self.class;
+	
+	return [[self flattenMap:^(id value) {
+		return [class return:block(value)];
+	}] setNameWithFormat:@"[%@] -map:", self.name];
+}
 ```
 
-`merge:`
+* `flatten`: 该操作主要作用于信号的信号。原信号O作为信号的信号，在被订阅时输出的数据必然也是个信号(signalValue)，这往往不是我们想要的。当我们执行[O flatten]操作时，因为flatten内部调用了flattenMap (1)，flattenMap里对应的中间信号就是原信号O输出的signalValue (2)。按照之前分析的经验，在flattenMap操作中新信号N输出的结果就是各中间信号M输出的集合。因此在flatten操作中新信号N被订阅时输出的值就是原信号O的各个子信号输出值的集合。
 
 ```objc
-	RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-      
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            LxPrintAnything(a);
-            [subscriber sendNext:@"a"];
-            [subscriber sendCompleted];
-        });
-        
-        return nil;
-    }];
-    
-    RACSignal * signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            LxPrintAnything(b);
-            [subscriber sendNext:@"b"];
-            [subscriber sendCompleted];
-        });
-        
-        return nil;
-    }];
-    
-    [[RACSignal merge:@[signalA, signalB]] subscribeNext:^(id x) {
-       
-        LxDBAnyVar(x);
-    }];
+- (instancetype)flatten
+{
+    return [self flattenMap:^(RACSignal *signalValue) { // (1)
+    		/// 返回值作为bind:中的中间信号
+        return signalValue; // (2)
+    };
+}
 ```
 
-`combineLatest:reduce:`
+**小结：**
+一直不理解`flatten`与`map`的区别，然后经过不断在源码中打断点，一步步跟代码，终于了解了他们之间的区别：
+`flatten`和`map`后面的block返回结果其实最终都会变为`bind:`方法中的中间信号，但是`flatten:`的block是直接把原信号发出的值返回来作为中间信号的，所以中间信号被订阅，其实就是原信号发出的值又被订阅，这也就是`flatten:`能拿到信号中的信号中的值的原因。
+而`map:`后面的block是把原信号发出的值加工处理了的，又生成了一个新的信号，即`map:`方法block返回的中间信号已经不是原来的信号中的信号了，而是把原信号发出的值作为它的包含值的一个新的信号，它被订阅时，发送的是原信号发出的那个值，这就是map拿不到原信号中的信号的原因。
+说白了就是`flatten:`操作的始终是原来的信号，而`map:`会生成一个包含原信号发送值的新信号。
 
-`concat:` （连接: 一个请求完成后，再启动另一个）
+----
+
+##### 简单分析一下 `- (RACMulticastConnection *)multicast:(RACSubject *)subject;`方法：
+* 1、当 `RACSignal` 类的实例调用 `- (RACMulticastConnection *)multicast:(RACSubject *)subject` 时，以 `self` 和 `subject` 作为构造参数创建一个 `RACMulticastConnection` 实例。
+* 2、`RACMulticastConnection` 构造的时候，保存 `source` 和 `subject` 作为成员变量，创建一个 `RACSerialDisposable` 对象，用于取消订阅。
+* 3、当 `RACMulticastConnection` 类的实例调用 `- (RACDisposable *)connect` 这个方法的时候，判断是否是第一次。如果是的话 用 `_signal` 这个成员变量（RACSubject类型）来订阅 `sourceSignal`， 之后返回 `self.serialDisposable`，否则直接返回 `self.serialDisposable` 。
+* 4、`RACMulticastConnection` 的 `signal` 只读属性，就是一个热信号，订阅这个热信号就避免了各种副作用的问题。它会在 `- (RACDisposable *)connect` 第一次调用后，根据 `sourceSignal` 的订阅结果来传递事件。
+* 5、想要确保第一次订阅就能成功订阅 `sourceSignal` ，可以使用 `- (RACSignal *)autoconnect` 这个方法，它保证了第一个订阅者触发 `sourceSignal` 的订阅，也保证了当返回的信号所有订阅者都关闭连接后 `sourceSignal` 被正确关闭连接。
+* 6、这里面订阅 `sourceSignal` 是重点，`_signal`是一个`RACSubject`类型，它里面维护着一个可变数组，每当它被订阅时，会把所有的**订阅者**保存到这个数组中。当`connection.signal`（即`_signal`）被订阅时，其实是`_signal`被订阅了。由于`_signal`是`RACSubject`类型对象，且`_signal`也是信号，它里面重写了订阅方法，所以会执行它自己的`subscribe:`方法，执行此方法之前订阅者参数是`RACSubscriber`类型，但是在这个subscribe方法中，初始化了一个`RACPassthroughSubscriber`实例对象，使它作为新的订阅者（其实就是对订阅者进行了一层包装），并把它存入了`subject`维护的那个订阅者数组里（原来的`订阅者`和`信号`被`RACPassthroughSubscriber`实例保存了），所以数组中最终保存的是`RACPassthroughSubscriber`类型的订阅者，然后它发送消息的时候调的还是它持有的`subject`对象进行发送消息。
+* 7、当`RACMulticastConnection`调用`connect`方法时，源信号`sourceSignal`被`_signal`订阅，即执行`[sourceSignal subscribe:subject]`方法，然后执行订阅`subscribeNext:`block回调，在回调中执行`sendNext:`，由于订阅者是`RACSubject`类型的实例对象，它里面也会执行`sendNext:`方法，此方法中会遍历它的数组中的订阅者依次发送消息。
+* 8、`connect`时订阅者是`RACSubject`发送的`sendNext:`，subject会拿到它那个订阅者数组遍历，取出其中的`RACPassthroughSubscriber`对象，然后用`RACPassthroughSubscriber`对象中的真实的订阅者去发送数据。
+
+----
+
+#### 再来看看RACCommand（未完）
+直接上源码:
 
 ```objc
-	RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-      
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            LxPrintAnything(a);
-            [subscriber sendNext:@"a"];
-            [subscriber sendCompleted];
-        });
-        
-        return nil;
-    }];
-    
-    RACSignal * signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            LxPrintAnything(b);
-            [subscriber sendNext:@"b"];
-            [subscriber sendCompleted];
-        });
-        
-        return nil;
-    }];
-    
-    [[signalA concat:signalB] subscribeNext:^(id x) {
-       
-        LxDBAnyVar(x);
-    }];
+- (id)initWithEnabled:(RACSignal *)enabledSignal signalBlock:(RACSignal * (^)(id input))signalBlock {
+	NSCParameterAssert(signalBlock != nil);
+
+	self = [super init];
+	if (self == nil) return nil;
+
+	_activeExecutionSignals = [[NSMutableArray alloc] init];
+	_signalBlock = [signalBlock copy];
+
+	RACSignal *newActiveExecutionSignals = [[[[[self
+		rac_valuesAndChangesForKeyPath:@keypath(self.activeExecutionSignals) options:NSKeyValueObservingOptionNew observer:nil]
+		reduceEach:^(id _, NSDictionary *change) {
+			NSArray *signals = change[NSKeyValueChangeNewKey];
+			if (signals == nil) return [RACSignal empty];
+			// 把数组转换为信号发送出去
+			return [signals.rac_sequence signalWithScheduler:RACScheduler.immediateScheduler];
+		}]
+		concat]    // 把各个信号中的信号连接起来
+		publish]
+		autoconnect];
+
+	// 把上面的信号洗一下,当出现错误的时候转换成empty空信号,并在主线程上传递
+	_executionSignals = [[[newActiveExecutionSignals
+		map:^(RACSignal *signal) {
+			return [signal catchTo:[RACSignal empty]];
+		}]
+		deliverOn:RACScheduler.mainThreadScheduler]
+		setNameWithFormat:@"%@ -executionSignals", self];
+	
+	RACMulticastConnection *errorsConnection = [[[newActiveExecutionSignals
+		flattenMap:^(RACSignal *signal) {
+			return [[signal
+				ignoreValues]
+				catch:^(NSError *error) {
+					return [RACSignal return:error];
+				}];
+		}]
+		deliverOn:RACScheduler.mainThreadScheduler]
+		publish];
+	
+	_errors = [errorsConnection.signal setNameWithFormat:@"%@ -errors", self];
+	[errorsConnection connect];
+
+	RACSignal *immediateExecuting = [RACObserve(self, activeExecutionSignals) map:^(NSArray *activeSignals) {
+		return @(activeSignals.count > 0);
+	}];
+
+	_executing = [[[[[immediateExecuting
+		deliverOn:RACScheduler.mainThreadScheduler]
+		// This is useful before the first value arrives on the main thread.
+		startWith:@NO]
+		distinctUntilChanged]
+		replayLast]
+		setNameWithFormat:@"%@ -executing", self];
+
+	RACSignal *moreExecutionsAllowed = [RACSignal
+		if:RACObserve(self, allowsConcurrentExecution)
+		then:[RACSignal return:@YES]
+		else:[immediateExecuting not]];
+	
+	if (enabledSignal == nil) {
+		enabledSignal = [RACSignal return:@YES];
+	} else {
+		enabledSignal = [[[enabledSignal
+			startWith:@YES]
+			takeUntil:self.rac_willDeallocSignal]
+			replayLast];
+	}
+	
+	_immediateEnabled = [[RACSignal
+		combineLatest:@[ enabledSignal, moreExecutionsAllowed ]]
+		and];
+	
+	_enabled = [[[[[self.immediateEnabled
+		take:1]
+		concat:[[self.immediateEnabled skip:1] deliverOn:RACScheduler.mainThreadScheduler]]
+		distinctUntilChanged]
+		replayLast]
+		setNameWithFormat:@"%@ -enabled", self];
+	
+	return self;
+}
 ```
+------
+####附1：对其中几个函数的图表说明
+> ![CombineLatest](http://img0.tuicool.com/QbyMjyR.png)
+> ![Zip](http://img2.tuicool.com/JBrMn2r.png)
+> ![操作结果](http://img0.tuicool.com/Nr2AriV.png)
+> ![Merge](http://img1.tuicool.com/U3Mzym3.png)
+> ![Concat](http://img0.tuicool.com/faIv6bu.png)
 
-`zipWith: `  （zip是成对出现的,二者都发送完毕或者无法凑成一对时,终止.意味着如果是一个流的第N个元素，一定要等到另外一个流第N值也收到才会一起组合发出。）
+###附2：`ReactiveCocoa`和`RxSwift` API图，引用自[FRPCheatSheeta](https://github.com/aiqiuqiu/FRPCheatSheeta)
+>
+**ReactiveCocoa-Objc**
+----
+![ReactiveCocoa-Objc](http://ww1.sinaimg.cn/large/006tNbRwjw1f69ss3l0y4j31jf1cpwtm.jpg)
+**ReactiveCocoa-Swift**
+----
+![ReactiveCocoaV4.x-Swift.png](http://ww4.sinaimg.cn/large/006tNbRwjw1f69u9n630vj31kw10nk1g.jpg)
+**RxSwift**
+----
+![RXSwift.png](http://ww2.sinaimg.cn/large/006tNbRwjw1f69u2fugtjj317k1n1tis.jpg)
+------
 
-```objc
-	RACSignal * signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-      
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            LxPrintAnything(a);
-            [subscriber sendNext:@"a"];
-            [subscriber sendCompleted];
-        });
-        
-        return nil;
-    }];
-    
-    RACSignal * signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            LxPrintAnything(b);
-            [subscriber sendNext:@"b"];
-            [subscriber sendCompleted];
-        });
-        
-        return nil;
-    }];
-    
-    [[signalA zipWith:signalB] subscribeNext:^(id x) {
-       
-        LxDBAnyVar(x);
-    }];
-```
-
-
->* RAC(<#TARGET, ...#>) 宏:
->* button setBackgroundColor:forState:
-
-```objc
-
-	UIButton * button = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.view addSubview:button];
-    
-    @weakify(self);
-    
-    [button mas_makeConstraints:^(MASConstraintMaker *make) {
-        
-        @strongify(self);
-        make.size.mas_equalTo(CGSizeMake(180, 40));
-        make.center.equalTo(self.view);
-    }];
-    
-    RAC(button, backgroundColor) = [RACObserve(button, selected) map:^UIColor *(NSNumber * selected) {
-        
-        return [selected boolValue] ? [UIColor redColor] : [UIColor greenColor];
-    }];
-    
-    [[button rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(UIButton * btn) {
-       
-        btn.selected = !btn.selected;
-    }];
-```
-
->* 用最少的代码写一个秒表：
-
-```objc
-	RAC(label, text) = [[RACSignal interval:1 onScheduler:[RACScheduler mainThreadScheduler]] map:^NSString *(NSDate * date) {
-       
-        return date.description;
-    }];
-```
-
-####**几张图对函数的说明**
-![CombineLatest](http://img0.tuicool.com/QbyMjyR.png)
-![Zip](http://img2.tuicool.com/JBrMn2r.png)
-![操作结果](http://img0.tuicool.com/Nr2AriV.png)
-![Merge](http://img1.tuicool.com/U3Mzym3.png)
-![Concat](http://img0.tuicool.com/faIv6bu.png)
+最后推荐一篇解析`@weakify`和`@strongify`宏的文章:[Reactive Cocoa中的@weakify、@strongify的实现](http://www.tuicool.com/articles/QJrqeam)
 
 
