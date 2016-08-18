@@ -112,6 +112,95 @@
 * 8、`connect`时订阅者是`RACSubject`发送的`sendNext:`，subject会拿到它那个订阅者数组遍历，取出其中的`RACPassthroughSubscriber`对象，然后用`RACPassthroughSubscriber`对象中的真实的订阅者去发送数据。
 
 ----
+
+#### 再来看看RACCommand
+直接上源码:
+
+```objc
+- (id)initWithEnabled:(RACSignal *)enabledSignal signalBlock:(RACSignal * (^)(id input))signalBlock {
+	NSCParameterAssert(signalBlock != nil);
+
+	self = [super init];
+	if (self == nil) return nil;
+
+	_activeExecutionSignals = [[NSMutableArray alloc] init];
+	_signalBlock = [signalBlock copy];
+
+	RACSignal *newActiveExecutionSignals = [[[[[self
+		rac_valuesAndChangesForKeyPath:@keypath(self.activeExecutionSignals) options:NSKeyValueObservingOptionNew observer:nil]
+		reduceEach:^(id _, NSDictionary *change) {
+			NSArray *signals = change[NSKeyValueChangeNewKey];
+			if (signals == nil) return [RACSignal empty];
+			// 把数组转换为信号发送出去
+			return [signals.rac_sequence signalWithScheduler:RACScheduler.immediateScheduler];
+		}]
+		concat]    // 把各个信号中的信号连接起来
+		publish]
+		autoconnect];
+
+	// 把上面的信号洗一下,当出现错误的时候转换成empty空信号,并在主线程上传递
+	_executionSignals = [[[newActiveExecutionSignals
+		map:^(RACSignal *signal) {
+			return [signal catchTo:[RACSignal empty]];
+		}]
+		deliverOn:RACScheduler.mainThreadScheduler]
+		setNameWithFormat:@"%@ -executionSignals", self];
+	
+	RACMulticastConnection *errorsConnection = [[[newActiveExecutionSignals
+		flattenMap:^(RACSignal *signal) {
+			return [[signal
+				ignoreValues]
+				catch:^(NSError *error) {
+					return [RACSignal return:error];
+				}];
+		}]
+		deliverOn:RACScheduler.mainThreadScheduler]
+		publish];
+	
+	_errors = [errorsConnection.signal setNameWithFormat:@"%@ -errors", self];
+	[errorsConnection connect];
+
+	RACSignal *immediateExecuting = [RACObserve(self, activeExecutionSignals) map:^(NSArray *activeSignals) {
+		return @(activeSignals.count > 0);
+	}];
+
+	_executing = [[[[[immediateExecuting
+		deliverOn:RACScheduler.mainThreadScheduler]
+		// This is useful before the first value arrives on the main thread.
+		startWith:@NO]
+		distinctUntilChanged]
+		replayLast]
+		setNameWithFormat:@"%@ -executing", self];
+
+	RACSignal *moreExecutionsAllowed = [RACSignal
+		if:RACObserve(self, allowsConcurrentExecution)
+		then:[RACSignal return:@YES]
+		else:[immediateExecuting not]];
+	
+	if (enabledSignal == nil) {
+		enabledSignal = [RACSignal return:@YES];
+	} else {
+		enabledSignal = [[[enabledSignal
+			startWith:@YES]
+			takeUntil:self.rac_willDeallocSignal]
+			replayLast];
+	}
+	
+	_immediateEnabled = [[RACSignal
+		combineLatest:@[ enabledSignal, moreExecutionsAllowed ]]
+		and];
+	
+	_enabled = [[[[[self.immediateEnabled
+		take:1]
+		concat:[[self.immediateEnabled skip:1] deliverOn:RACScheduler.mainThreadScheduler]]
+		distinctUntilChanged]
+		replayLast]
+		setNameWithFormat:@"%@ -enabled", self];
+	
+	return self;
+}
+```
+
 #### 附：`ReactiveCocoa`和`RxSwift` API图，引用自[FRPCheatSheeta](https://github.com/aiqiuqiu/FRPCheatSheeta)
 >
 **ReactiveCocoa-Objc**
