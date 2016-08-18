@@ -1,22 +1,22 @@
-###对ReactiveCocoa的一些理解
+###对ReactiveCocoa中几个函数的解读
 ####flattenMap与map
 >* 推荐文章：
 >* [RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe) 
 >* [细说ReactiveCocoa的冷信号与热信号（三）：怎么处理冷信号与热信号](http://tech.meituan.com/talk-about-reactivecocoas-cold-signal-and-hot-signal-part-3.html) 
 
-本帖有些地方是参考刚才的推荐文章来理解的，在此感谢**godyZ**和**美团团队**。
+P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**godyZ**和**美团团队**。
 
-> 具体来看源码（为方便理解，去掉了源代码中`RACDisposable`, `@synchronized`, `@autoreleasepool`相关代码)。当新信号`N`被外部订阅时，会进入信号`N`的`didSubscribeBlock` (1)，之后订阅原信号`O` (2)，当原信号`O`有值输出后就用`bind`函数传入的`bindBlock`将其变换成中间信号`M` (3), 并马上对其进行订阅(4)，最后将中间信号`M`的输出作为新信号`N`的输出 (5)。
-> 即：当新生成的信号被订阅时，原信号也会立即被订阅
+>* `map`和`flatten`是基于`flattenMap`,而`flattenMap`是基于`bind:`,所以在此之前先来看看`bind`函数。
+>* 具体来看源码（为方便理解，去掉了源代码中`RACDisposable`, `@synchronized`, `@autoreleasepool`相关代码)。当新信号`N`被外部订阅时，会进入信号`N`的`didSubscribeBlock` (1)，之后订阅原信号`O` (2)，当原信号`O`有值输出后就用`bind`函数传入的`bindBlock`将其变换成中间信号`M` (3), 并马上对其进行订阅(4)，最后将中间信号`M`的输出作为新信号`N`的输出 (5)。即：当新生成的信号被订阅时，原信号也会立即被订阅。
 
 ```objc
 - (RACSignal *)bind:(RACStreamBindBlock (^)(void))block {
     return [RACSignal createSignal:^(id<RACSubscriber> subscriber) { // (1)
-        RACStreamBindBlock bindingBlock = block();
+        RACStreamBindBlock bindingBlock = block(); // (MARK:此处执行block回调,生成一个bindingBlock)
         
         [self subscribeNext:^(id x) {  // (2)
             BOOL stop = NO;
-            id middleSignal = bindingBlock(x, &stop);  // (3)
+            id middleSignal = bindingBlock(x, &stop);  // (3) map与flatten结果不同，问题就出在这里
             
             if (middleSignal != nil) {
                 RACDisposable *disposable = [middleSignal subscribeNext:^(id x) { // (4)
@@ -52,6 +52,7 @@
 		/// BOOL stop = NO;
      	/// id middleSignal = bindingBlock(x, &stop);
      	///
+     	/// 与上面`bind:`函数中的(3)对应起来,
      	/// 可以看出bindBlock中的x是原信号被subscribe后传出的值，即对应下面的value
      	/// 也即flattenMap block中执行后传出的值，
      	/// 即上面的(RACStream * (^ block)(id value))中的value

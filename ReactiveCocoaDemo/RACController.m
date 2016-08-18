@@ -201,7 +201,17 @@
 
 - (void)flattenMap
 {
+    RACSignal *signal = [RACSignal return:@"你好"];
     
+    [[signal flattenMap:^RACStream *(NSString *value) {
+        RACSignal *innerSignal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+            [subscriber sendNext:[value stringByAppendingString:@",我是内部信号中的值"]];
+            return nil;
+        }];
+        return innerSignal;
+    }] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
 }
 
 - (void)flatten
@@ -797,7 +807,7 @@
 }
 
 /// 这个有点像collect,它也是把`sendNext`的所有结果放入一个数组中,然后以tuple结果延迟一次性全部发送;
-/// 不过这个有个地方需要注意的是,从源码可以看到,当订阅者发送`sendCompleted`消息时会立即执行源信号被订阅时346行位置的`completed:`里面的那个block,然后执行`sendCompleted`,然后`timerDisposable`会被dispose,这样那个延迟方法会失效(其实根本就不执行那个方法了)
+/// 不过这里有个地方需要注意的是,从源码可以看到,当订阅者发送`sendCompleted`消息时会立即执行源信号被订阅时346行位置的`completed:`里面的那个block,然后执行`sendCompleted`,然后`timerDisposable`会被dispose,这样那个延迟方法会失效(其实根本就不执行那个方法了)
 - (void)bufferWithTime
 {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
