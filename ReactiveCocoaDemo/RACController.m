@@ -24,6 +24,7 @@
 @property(weak, nonatomic) IBOutlet UITextField *textField;
 @property(weak, nonatomic) IBOutlet UIButton *showTextButton;
 @property(weak, nonatomic) IBOutlet UIButton *pushButton;
+@property (nonatomic, copy) NSString *tempText;
 
 @end
 
@@ -136,6 +137,9 @@
             break;
         case 27:
             [self bufferWithTime];
+            break;
+        case 28:
+            [self channel];
             break;
         default:
             break;
@@ -826,6 +830,24 @@
     
     // finally print 1，2，3，4
     [[[RACSignal merge:@[signalA, signalB]] bufferWithTime:7 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
+}
+
+/// https://github.com/ReactiveCocoa/ReactiveCocoa/issues/1023
+/// https://github.com/ReactiveCocoa/ReactiveCocoa/issues/1473
+/// They're not the same.
+/// self.valueTextField.rac_newTextChannel sends values when you type in the text field, but not when you change the text in the text field from code.
+/// RACChannelTo(self.uiTextField, text) sends values when you change the text in the text field from code, but not when you type(输入、键入) in the text field.
+///
+/// 我个人的理解:self.valueTextField.rac_newTextChannel会在输入文字时响应,但不会对textField.text = @"xx"这种直接改变文字的情况响应. 而RACChannelTo() 能够响应文字改变的情况,但是不会响应键入文字的情况.
+- (void)channel {
+    // 正常情况下的双向绑定(p.s RAC() 是单向的)
+    RACChannelTo(self.myLabel, text, @"你好") = RACChannelTo(self.textField, text); // 输入文字时不执行
+    //RACChannelTo(self.myLabel, text, @"你好") = [self.textField rac_newTextChannel]; // 输入文字时能够执行
+    [[[RACObserve(self, myLabel.text) distinctUntilChanged] filter:^BOOL(NSString *value) {
+        return value.length > 0;
+    }] subscribeNext:^(id x) {
         NSLog(@"%@", x);
     }];
 }

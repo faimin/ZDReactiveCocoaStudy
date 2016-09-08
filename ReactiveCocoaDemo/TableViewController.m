@@ -45,7 +45,8 @@
                   @"scanWithStart",
                   @"combinePreviousWithStart",
                   @"aggregate",
-                  @"bufferWithTime"
+                  @"bufferWithTime",
+                  @"channel"
                   ];
 }
 
