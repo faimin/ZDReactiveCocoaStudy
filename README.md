@@ -114,7 +114,7 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 
 ----
 
-#### 再来看看RACCommand（未完）
+#### 再来看看RACCommand（未完待续）
 直接上源码:
 
 ```objc
@@ -126,7 +126,8 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 
 	_activeExecutionSignals = [[NSMutableArray alloc] init];
 	_signalBlock = [signalBlock copy];
-
+	
+	// 监听`activeExecutionSignals`数组
 	RACSignal *newActiveExecutionSignals = [[[[[self
 		rac_valuesAndChangesForKeyPath:@keypath(self.activeExecutionSignals) options:NSKeyValueObservingOptionNew observer:nil]
 		reduceEach:^(id _, NSDictionary *change) {
@@ -135,11 +136,11 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 			// 把数组转换为信号发送出去
 			return [signals.rac_sequence signalWithScheduler:RACScheduler.immediateScheduler];
 		}]
-		concat]    // 把各个信号中的信号连接起来
-		publish]
-		autoconnect];
+		concat]    		// 把各个信号中的信号连接起来
+		publish]			// 广播出去，可以被多个订阅者订阅
+		autoconnect];	// 有订阅了再发送广播
 
-	// 把上面的信号洗一下,当出现错误的时候转换成empty空信号,并在主线程上传递
+	// 把上面的信号`map`一下,当出现错误的时候转换成`empty`空信号,并在主线程上传递
 	_executionSignals = [[[newActiveExecutionSignals
 		map:^(RACSignal *signal) {
 			return [signal catchTo:[RACSignal empty]];
@@ -147,6 +148,8 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 		deliverOn:RACScheduler.mainThreadScheduler]
 		setNameWithFormat:@"%@ -executionSignals", self];
 	
+	// 先通过`ignoreValues`方法屏蔽掉`sendNext:`的结果，只保留`sendError:`和`sendCompleted`结果，然后再通过`catch:`方法拿到所有的`sendError:`结果，发送给订阅者。
+	// 此处用的是`flattenMap`，可以直接获取到错误信息。
 	RACMulticastConnection *errorsConnection = [[[newActiveExecutionSignals
 		flattenMap:^(RACSignal *signal) {
 			return [[signal
@@ -161,10 +164,12 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 	_errors = [errorsConnection.signal setNameWithFormat:@"%@ -errors", self];
 	[errorsConnection connect];
 
+	// 根据执行信号的数量判断`RACCommand`当前是否正在执行
 	RACSignal *immediateExecuting = [RACObserve(self, activeExecutionSignals) map:^(NSArray *activeSignals) {
 		return @(activeSignals.count > 0);
 	}];
-
+	
+	// 是否正在执行
 	_executing = [[[[[immediateExecuting
 		deliverOn:RACScheduler.mainThreadScheduler]
 		// This is useful before the first value arrives on the main thread.
@@ -172,7 +177,8 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 		distinctUntilChanged]
 		replayLast]
 		setNameWithFormat:@"%@ -executing", self];
-
+	
+	// 如果允许并发执行，返回`YES`，否则反转`immediateExecuting`信号的结果
 	RACSignal *moreExecutionsAllowed = [RACSignal
 		if:RACObserve(self, allowsConcurrentExecution)
 		then:[RACSignal return:@YES]
@@ -200,7 +206,104 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 	
 	return self;
 }
+
+// 使用时，我们通常会去生成一个RACCommand对象，并传入一个返回signal对象的block。每次RACCommand execute 执行操作时，都会通过传入的这个signal block生成一个执行信号E (1)，并将该信号添加到RACCommand内部信号数组activeExecutionSignals中 (2)，同时将信号E由冷信号转成热信号(3)，最后订阅该热信号(4)，并将其返回(5)。
+- (RACSignal *)execute:(id)input { 
+    RACSignal *signal = self.signalBlock(input); //（1）
+    RACMulticastConnection *connection = [[signal subscribeOn:RACScheduler.mainThreadScheduler] multicast:[RACReplaySubject subject]]; // (3)
+
+    @weakify(self);
+    [self addActiveExecutionSignal:connection.signal]; // (2)
+
+    [connection.signal subscribeError:^(NSError *error) {
+        @strongify(self);
+        [self removeActiveExecutionSignal:connection.signal];
+    } completed:^{
+        @strongify(self);
+        [self removeActiveExecutionSignal:connection.signal];
+    }];
+
+    [connection connect]; // (4)
+
+    return [connection.signal]; // (5)
+}
 ```
+> 说说几个函数
+
+```objc
+// 以下是对`allowsConcurrentExecution`属性的处理方法，利用了属性的原子性，防止资源竞争，值得学习
+@property (atomic, assign) BOOL allowsConcurrentExecution;
+@property (atomic, copy, readonly) NSArray *activeExecutionSignals;
+
+{
+	// The mutable array backing `activeExecutionSignals`.
+	//
+	// This should only be used while synchronized on `self`.
+	NSMutableArray *_activeExecutionSignals;
+
+	// Atomic backing variable for `allowsConcurrentExecution`.
+	volatile uint32_t _allowsConcurrentExecution;
+}
+
+
+//============================================================
+
+- (BOOL)allowsConcurrentExecution {
+	return _allowsConcurrentExecution != 0;
+}
+
+- (void)setAllowsConcurrentExecution:(BOOL)allowed {
+	[self willChangeValueForKey:@keypath(self.allowsConcurrentExecution)];
+
+	if (allowed) {
+		// 以下函数类似于 `||`  
+		// 只要前者和后者有一个为真，那么后者就为真；即：不管`_allowsConcurrentExecution`是否等于1，它最终都会变为`1`，因为前者是1；
+		OSAtomicOr32Barrier(1, &_allowsConcurrentExecution);
+	} else {
+		// 以下函数类似于 `&&`  
+		// 前后二者必须都为真，后者才会变为真；即：不管`_allowsConcurrentExecution`等于0还是1，它最终都会变为`0`，因为前者是0
+		OSAtomicAnd32Barrier(0, &_allowsConcurrentExecution);
+	}
+	// 手动调用KVO，通知监听者 `allowsConcurrentExecution`属性改变了
+	[self didChangeValueForKey:@keypath(self.allowsConcurrentExecution)];
+}
+
+//========================数组属性================================
+- (NSArray *)activeExecutionSignals {
+	@synchronized (self) {
+		return [_activeExecutionSignals copy];
+	}
+}
+
+- (void)addActiveExecutionSignal:(RACSignal *)signal {
+	NSCParameterAssert([signal isKindOfClass:RACSignal.class]);
+
+	@synchronized (self) {
+		NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:_activeExecutionSignals.count];
+		[self willChange:NSKeyValueChangeInsertion valuesAtIndexes:indexes forKey:@keypath(self.activeExecutionSignals)];
+		[_activeExecutionSignals addObject:signal];
+		[self didChange:NSKeyValueChangeInsertion valuesAtIndexes:indexes forKey:@keypath(self.activeExecutionSignals)];
+	}
+}
+
+- (void)removeActiveExecutionSignal:(RACSignal *)signal {
+	NSCParameterAssert([signal isKindOfClass:RACSignal.class]);
+
+	@synchronized (self) {
+		// 从当前数组中获取到要移除的对象的indexSets，如果不存在直接返回
+		NSIndexSet *indexes = [_activeExecutionSignals indexesOfObjectsPassingTest:^ BOOL (RACSignal *obj, NSUInteger index, BOOL *stop) {
+			return obj == signal;
+		}];
+
+		if (indexes.count == 0) return;
+		// 手动调用KVO，通知监听者 `activeExecutionSignals` 数组的改变
+		[self willChange:NSKeyValueChangeRemoval valuesAtIndexes:indexes forKey:@keypath(self.activeExecutionSignals)];
+		[_activeExecutionSignals removeObjectsAtIndexes:indexes];
+		[self didChange:NSKeyValueChangeRemoval valuesAtIndexes:indexes forKey:@keypath(self.activeExecutionSignals)];
+	}
+}
+```
+
 ------
 ####附1：对其中几个函数的图表说明
 > ![CombineLatest](http://img0.tuicool.com/QbyMjyR.png)

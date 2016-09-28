@@ -141,6 +141,9 @@
         case 28:
             [self channel];
             break;
+        case 29:
+            [self reduceApply];
+            break;
         default:
             break;
     }
@@ -849,6 +852,21 @@
         return value.length > 0;
     }] subscribeNext:^(id x) {
         NSLog(@"%@", x);
+    }];
+}
+
+/// `reduceApply`是对`RACTuple`进行操作，用`tuple`中的第一个元素（必须是block）作为规则，剩余的元素作为它的参数
+/// 如下图所示，adder中的a和b对应于下面的100和200
+- (void)reduceApply {
+    RACSignal *adder = [RACSignal return:^(NSNumber *a, NSNumber *b) {
+        return @(a.intValue + b.intValue);
+    }];
+    
+    RACSignal *sums = [[RACSignal combineLatest:@[ adder, [RACSignal return:@100], [RACSignal return:@1000] ]] reduceApply];
+    
+    [sums subscribeNext:^(id x) {
+        // print 1100
+        NSLog(@"\nreduceApply -- %@", x);
     }];
 }
 

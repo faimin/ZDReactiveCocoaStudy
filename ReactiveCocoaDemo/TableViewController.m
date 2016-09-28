@@ -46,7 +46,8 @@
                   @"combinePreviousWithStart",
                   @"aggregate",
                   @"bufferWithTime",
-                  @"channel"
+                  @"channel",
+                  @"reduceApply"
                   ];
 }
 
