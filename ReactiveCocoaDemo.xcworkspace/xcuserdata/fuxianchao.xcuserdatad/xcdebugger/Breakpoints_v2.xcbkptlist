@@ -48,7 +48,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Pods/ReactiveCocoa/ReactiveCocoa/RACCommand.m"
@@ -58,7 +58,7 @@
             startingLineNumber = "143"
             endingLineNumber = "143"
             landmarkName = "-initWithEnabled:signalBlock:"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -74,7 +74,7 @@
             startingLineNumber = "266"
             endingLineNumber = "266"
             landmarkName = "-map"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -90,7 +90,7 @@
             startingLineNumber = "215"
             endingLineNumber = "215"
             landmarkName = "-flattenMap"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -106,13 +106,13 @@
             startingLineNumber = "220"
             endingLineNumber = "220"
             landmarkName = "-flattenMap"
-            landmarkType = "5">
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Pods/ReactiveCocoa/ReactiveCocoa/RACCommand.m"
@@ -122,52 +122,52 @@
             startingLineNumber = "177"
             endingLineNumber = "177"
             landmarkName = "-initWithEnabled:signalBlock:"
-            landmarkType = "5">
+            landmarkType = "7">
             <Locations>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "-[RACCommand initWithEnabled:signalBlock:]"
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/Pods/ReactiveCocoa/ReactiveCocoa/RACCommand.m"
-                  timestampString = "496745721.099569"
+                  timestampString = "505915040.963101"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "177"
                   endingLineNumber = "177"
-                  offsetFromSymbolStart = "1764">
+                  offsetFromSymbolStart = "1516">
                </Location>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "-[RACCommand initWithEnabled:signalBlock:]"
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/Pods/ReactiveCocoa/ReactiveCocoa/RACCommand.m"
-                  timestampString = "496745721.099687"
+                  timestampString = "505915040.96422"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "177"
                   endingLineNumber = "177"
-                  offsetFromSymbolStart = "2028">
+                  offsetFromSymbolStart = "1708">
                </Location>
                <Location
-                  shouldBeEnabled = "Yes"
+                  shouldBeEnabled = "No"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "__42-[RACCommand initWithEnabled:signalBlock:]_block_invoke_5"
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/Pods/ReactiveCocoa/ReactiveCocoa/RACCommand.m"
-                  timestampString = "496745721.099782"
+                  timestampString = "505915040.965393"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "178"
                   endingLineNumber = "178"
-                  offsetFromSymbolStart = "48">
+                  offsetFromSymbolStart = "56">
                </Location>
             </Locations>
          </BreakpointContent>

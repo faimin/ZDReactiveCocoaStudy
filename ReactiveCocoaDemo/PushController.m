@@ -23,6 +23,9 @@
     
     self.okButton.rac_command = self.command;
     
+    [[[self.okButton rac_signalForControlEvents:UIControlEventTouchUpInside] throttle:5] subscribeNext:^(id x) {
+        NSLog(@"okOK");
+    }];
 }
 
 - (void)didReceiveMemoryWarning {

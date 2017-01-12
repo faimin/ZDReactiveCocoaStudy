@@ -114,7 +114,7 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 
 ----
 
-#### 再来看看RACCommand（未完待续）
+#### 再来看看RACCommand
 直接上源码:
 
 ```objc
@@ -325,6 +325,6 @@ P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**god
 ![RXSwift.png](http://ww2.sinaimg.cn/large/006tNbRwjw1f69u2fugtjj317k1n1tis.jpg)
 ------
 
-最后推荐一篇解析`@weakify`和`@strongify`宏的文章:[Reactive Cocoa中的@weakify、@strongify的实现](http://www.tuicool.com/articles/QJrqeam)
-
-
+## 推荐
++ [Halfrost's Field分析ReactiveCocoa的系列文章](http://www.tuicool.com/sites/NRbMbqa)
++ [Reactive Cocoa中的@weakify、@strongify的实现](http://www.tuicool.com/articles/QJrqeam)
