@@ -855,18 +855,44 @@
     }];
 }
 
-/// `reduceApply`是对`RACTuple`进行操作，用`tuple`中的第一个元素（必须是block）作为规则，剩余的元素作为它的参数
+/// `reduceApply`是对`RACTuple`进行操作，用`tuple`中的第一个元素（必须是block）作为规则，剩余的元素作为它的参数，感觉类似于`makeObjectsPerformSelector:`方法
 /// 如下图所示，adder中的a和b对应于下面的100和200
 - (void)reduceApply {
+    //==============================**** demo1
     RACSignal *adder = [RACSignal return:^(NSNumber *a, NSNumber *b) {
         return @(a.intValue + b.intValue);
     }];
     
     RACSignal *sums = [[RACSignal combineLatest:@[ adder, [RACSignal return:@100], [RACSignal return:@1000] ]] reduceApply];
-    
     [sums subscribeNext:^(id x) {
         // print 1100
         NSLog(@"\nreduceApply -- %@", x);
+    }];
+    
+    //===============================*** demo2
+    RACSignal *signalA = [RACSignal createSignal: ^RACDisposable *(id<RACSubscriber> subscriber) {
+        id block = ^id(NSNumber *first,NSNumber *second,NSNumber *third) {
+            return @(first.integerValue + second.integerValue * third.integerValue);
+        };
+        
+        [subscriber sendNext:RACTuplePack(block, @2, @3, @8)];
+        //前面的id是为了强转，否则报错
+        // 这里虽然后面跟了3个参数，但是由于block中只有带一个参数，所以后面的3个参数中只会用到第一个参数而已，其他的无用
+        [subscriber sendNext:RACTuplePack((id)(^NSNumber *(NSNumber *x) {
+            return @(x.intValue * 10);
+        }), @9, @10, @30)];
+        
+        [subscriber sendCompleted];
+        
+        return [RACDisposable disposableWithBlock:^{
+            NSLog(@"signal dispose");
+        }];
+    }];
+    
+    RACSignal *signalB = [signalA reduceApply];
+    
+    [signalB subscribeNext:^(id x) {
+        NSLog(@"%@", x);
     }];
 }
 
