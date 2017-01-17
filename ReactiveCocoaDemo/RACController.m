@@ -45,7 +45,7 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-  // Dispose of any resources that can be recreated.
+    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Signal
@@ -55,7 +55,7 @@
 {
     switch (self.type) {
         case 0:
-            [self combineLatestReduce];
+            [self bind];
             break;
         case 1:
             [self flattenMap];
@@ -73,75 +73,78 @@
             [self merge];
             break;
         case 6:
-            [self concat];
+            [self combineLatestReduce];
             break;
         case 7:
-            [self then];
+            [self concat];
             break;
         case 8:
-            [self replay1];
+            [self then];
             break;
         case 9:
-            [self replayLazily];
+            [self replay1];
             break;
         case 10:
-            [self mutableConnection];
+            [self replayLazily];
             break;
         case 11:
-            [self deliverOn];
+            [self mutableConnection];
             break;
         case 12:
-            [self distinctUntilChanged];
+            [self deliverOn];
             break;
         case 13:
-            [self throttle];
+            [self distinctUntilChanged];
             break;
         case 14:
-            [self ignore];
+            [self throttle];
             break;
         case 15:
-            [self ignoreValues];
+            [self ignore];
             break;
         case 16:
-            [self skip];
+            [self ignoreValues];
             break;
         case 17:
-            [self take];
+            [self skip];
             break;
         case 18:
-            [self takeUntil];
+            [self take];
             break;
         case 19:
-            [self timer];
+            [self takeUntil];
             break;
         case 20:
-            [self swithToLatest];
+            [self timer];
             break;
         case 21:
-            [self materialize];
+            [self swithToLatest];
             break;
         case 22:
-            [self liftSelector];
+            [self materialize];
             break;
         case 23:
-            [self collect];
+            [self liftSelector];
             break;
         case 24:
-            [self scanWithStart];
+            [self collect];
             break;
         case 25:
-            [self combinePreviousWithStart];
+            [self scanWithStart];
             break;
         case 26:
-            [self aggregate];
+            [self combinePreviousWithStart];
             break;
         case 27:
-            [self bufferWithTime];
+            [self aggregate];
             break;
         case 28:
-            [self channel];
+            [self bufferWithTime];
             break;
         case 29:
+            [self channel];
+            break;
+        case 30:
             [self reduceApply];
             break;
         default:
@@ -160,49 +163,29 @@
 // 3.1 sendNext底层其实就是执行subscriber的nextBlock
 
 
-/// 将一组Signal发出的最新的事件合并成一个Signal，每当这组Signal发出新事件时，reduce的block会执行，将所有新事件的值合并成一个值，并当做合并后Signal的事件发出去。
-/// 这个方法会返回合并后的Signal。
-/// reduce的block中参数，其实是与combineLatest中数组元素一一对应的
-- (void)combineLatestReduce
+- (void)bind
 {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        [subscriber sendNext:@"1"];
-        [subscriber sendNext:@"2"];
-        [subscriber sendNext:@"3"];
+        [subscriber sendNext:@"2017年01月17日15:38:04"];
         [subscriber sendCompleted];
-        return nil;
+        return [RACDisposable disposableWithBlock:^{
+            NSLog(@"bind信号释放了");
+        }];
     }];
     
-    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        [subscriber sendNext:@"11"];
-        [subscriber sendNext:@"12"];
-        [subscriber sendCompleted];
-        return nil;
+    RACSignal *signalB = [signalA bind:^RACStreamBindBlock{
+        // 下面这个block的回调时机是：
+        // 下面的bindBlock是在signalA的subscribeNext的block中回调的，所以当signalA被订阅且signalA发送值后，bindBlock会发生回调，然后回调的第一个参数是signalA发送过来的值，也就是说下面bindBlock中参数value的值即为 @"2017年01月17日15:38:04"
+        RACStream *(^BindBlock) (id value, BOOL *stop) = ^RACStream * (id value, BOOL *stop) {
+            NSString *componentString = [NSString stringWithFormat:@"%@, 哈咪", value];
+            RACSignal *signal = [RACSignal return:componentString];
+            return signal;
+        };
+        return BindBlock;
     }];
     
-    RACSignal *signalC = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        [subscriber sendNext:@"21"];
-        [subscriber sendNext:@"22"];
-        [subscriber sendCompleted];
-        return nil;
-    }];
-    
-    [[RACSignal combineLatest:@[signalA, signalB, signalC] reduce:^id(NSString *a , NSString *b, NSString *c){
-        NSString *resultString = [NSString stringWithFormat:@"\na = %@, b = %@, c = %@", a, b, c];
-        NSLog(@"%@", resultString);
-        return resultString;
-    }] subscribeNext:^(id x) {
-        NSLog(@"%@", x);
-    }];
-    
-    [[RACSignal combineLatest:@[signalA, signalB]] subscribeNext:^(RACTuple *x) {
-        RACSequence *seque = x.rac_sequence;
-        NSArray *resultArray = seque.array;
-        NSLog(@"%@", resultArray);
-        
-        RACTupleUnpack(NSString *str1, NSString *str2) = x;
-        NSString *str = FORMATSTRING(@"%@%@", str1, str2);
-        NSLog(@"%@,\n %@", x, str);
+    [signalB subscribeNext:^(id x) {
+        NSLog(@"执行bind之后的结果：%@", x);
     }];
 }
 
@@ -297,6 +280,52 @@
 //    [[signalA merge:signalB] subscribeNext:^(NSString *x) {
 //        NSLog(@"%@", x);
 //    }];
+}
+
+/// 将一组Signal发出的最新的事件合并成一个Signal，每当这组Signal发出新事件时，reduce的block会执行，将所有新事件的值合并成一个值，并当做合并后Signal的事件发出去。
+/// 这个方法会返回合并后的Signal。
+/// reduce的block中参数，其实是与combineLatest中数组元素一一对应的
+- (void)combineLatestReduce
+{
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"1"];
+        [subscriber sendNext:@"2"];
+        [subscriber sendNext:@"3"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"11"];
+        [subscriber sendNext:@"12"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    RACSignal *signalC = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"21"];
+        [subscriber sendNext:@"22"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+    
+    [[RACSignal combineLatest:@[signalA, signalB, signalC] reduce:^id(NSString *a , NSString *b, NSString *c){
+        NSString *resultString = [NSString stringWithFormat:@"\na = %@, b = %@, c = %@", a, b, c];
+        NSLog(@"%@", resultString);
+        return resultString;
+    }] subscribeNext:^(id x) {
+        NSLog(@"%@", x);
+    }];
+    
+    [[RACSignal combineLatest:@[signalA, signalB]] subscribeNext:^(RACTuple *x) {
+        RACSequence *seque = x.rac_sequence;
+        NSArray *resultArray = seque.array;
+        NSLog(@"%@", resultArray);
+        
+        RACTupleUnpack(NSString *str1, NSString *str2) = x;
+        NSString *str = FORMATSTRING(@"%@%@", str1, str2);
+        NSLog(@"%@,\n %@", x, str);
+    }];
 }
 
 ///  @brief  压缩: 把两个信号中的数据连到一起，生成一个RACTuple，[A

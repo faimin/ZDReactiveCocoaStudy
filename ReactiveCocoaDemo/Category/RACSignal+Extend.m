@@ -10,8 +10,15 @@
 
 @implementation RACSignal (Extend)
 
-- (RACSignal *)serialCollect:(RACSignal *)signal {
-    return [[[self concat:signal] collect] setNameWithFormat:@"[%@] -serialCollect: %@", self.name, signal];
+- (RACSignal *)serialCollect:(NSArray<RACSignal *> *)signals {
+    NSParameterAssert(signals);
+    NSMutableArray *signalsArr = ({
+        NSMutableArray *mutArr = @[].mutableCopy;
+        [mutArr addObject:self];
+        [mutArr addObjectsFromArray:signals];
+        mutArr;
+    });
+    return [[[RACSignal concat:signalsArr] collect] setNameWithFormat:@"[%@] -serialCollect: %@", self.name, signals];
 }
 
 - (RACSignal *)filterEvent:(NSTimeInterval)interval {

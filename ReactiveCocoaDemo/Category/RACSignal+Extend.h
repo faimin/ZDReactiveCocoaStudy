@@ -10,10 +10,10 @@
 
 @interface RACSignal (Extend)
 
-/// 连接2个请求后把结果放在一起
-- (RACSignal *)serialCollect:(RACSignal *)signal;
+/// 连接多个请求后把结果放在一起
+- (RACSignal *)serialCollect:(NSArray<RACSignal *> *)signals;
 
-/// 防止按钮多次点击
+/// 防止按钮被连续点击
 - (RACSignal *)filterEvent:(NSTimeInterval)interval;
 
 @end

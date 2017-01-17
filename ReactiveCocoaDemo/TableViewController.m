@@ -19,12 +19,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.data = @[
-        @"combineLatestReduce",
+        @"bind",
         @"flattenMap",
         @"flatten",
         @"map",
         @"zip",
         @"merge",
+        @"combineLatestReduce",
         @"concat",
         @"then",
         @"replay",
