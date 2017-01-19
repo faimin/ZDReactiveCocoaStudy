@@ -49,7 +49,8 @@
         @"aggregate",
         @"bufferWithTime",
         @"channel",
-        @"reduceApply"
+        @"reduceApply",
+        @"sequence"
     ];
 }
 

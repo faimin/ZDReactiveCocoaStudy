@@ -147,6 +147,9 @@
         case 30:
             [self reduceApply];
             break;
+        case 31:
+            [self sequence];
+            break;
         default:
             break;
     }
@@ -494,9 +497,9 @@
     }];
 }
 
-/// 信号被publish的真实操作看源码可知：创建一个`RACSubject`对象,
-/// 然后调用`multicast`方法,通过这个`subject`对象和`源信号`作为参数又创建了一个`RACMulticastConnection`对象,
-/// 
+/// 信号被`publish`的真实操作看源码可知：
+/// 先创建一个`RACSubject`对象，来作为热信号，然后调用`multicast`方法，通过这个`subject`对象和`源信号`作为参数又创建了一个`RACMulticastConnection`对象，
+/// 当调用`connect`方法时，`subject`会订阅`源信号`，即self。
 - (void)mutableConnection
 {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
@@ -738,6 +741,7 @@
 /// 当signalA和signalB都至少sendNext过一次，接下来只要其中任意一个signal有了新的内容，doA:withB这个方法就会自动被触发，withSignals:有几个signal，liftselector的选择子中就会有几个参数。
 - (void)liftSelector
 {
+    
 //    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
 //        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
 //            [subscriber sendNext:@"A"];
@@ -801,11 +805,12 @@
     }];
 }
 
-/// 该操作可将上次reduceBlock处理后输出的结果作为参数，传入当次reduceBlock操作，往往用于信号输出值的聚合处理。
+/// 该操作可将上次`reduceBlock`处理后输出的结果作为参数，传入当次`reduceBlock`操作，往往用于信号输出值的聚合处理。
+/// 这个方法跟`RACSequence`中的`foldLeftWithStart:reduce:`效果是一样的
 - (void)scanWithStart
 {
     // 下面的例子，第一次会拿到start：0作为上一次的值和新值1相加=1，然后把这个reduce后的结果放入数组中，第二次执行时会拿到上次的1和新值2相加=3，然后把第二次reduce的结果放入数组中，第三次拿到3和新值3，然后再相加=6...，所以最终print一个装有 1，3，6，10的数组。
-    RACSequence *numbers = @[ @1, @2, @3, @4 ].rac_sequence;
+    RACSequence *numbers = @[@1, @2, @3, @4].rac_sequence;
     // Contains 1, 3, 6, 10
     RACSequence *sums = [numbers scanWithStart:@0 reduce:^(NSNumber *sum, NSNumber *next) {
         return @(sum.integerValue + next.integerValue);
@@ -925,6 +930,66 @@
     }];
 }
 
+/// `RACSequence`继承于`RACStream`，跟RACSignal是平级的；
+/// 当`RACSequence`换换为`RACSignal`时最终执行的是下面的方法，
+///
+/// sequence里面包含几个对象，然后被订阅时就会执行多少次，
+/// 原因在于下面的`reschedule()`方法，这其实就相当于是一个递归调用。
+/**
+ - (RACSignal *)signalWithScheduler:(RACScheduler *)scheduler {
+	return [[RACSignal createSignal:^(id<RACSubscriber> subscriber) {
+        __block RACSequence *sequence = self;
+ 
+        return [scheduler scheduleRecursiveBlock:^(void (^reschedule)(void)) {
+            if (sequence.head == nil) {
+                [subscriber sendCompleted];
+                return;
+            }
+ 
+            [subscriber sendNext:sequence.head];
+ 
+            sequence = sequence.tail;
+            // 递归调用
+            reschedule();
+        }];
+	}] setNameWithFormat:@"[%@] -signalWithScheduler: %@", self.name, scheduler];
+ }
+*/
+- (void)sequence {
+    
+    RACSequence *sequence = [[@[@0, @1, @2, @3, @4, @5] rac_sequence] filter:^BOOL(id value) {
+        return [value intValue] > 1;
+    }];
+    
+    // 转换成信号
+    RACSignal *signal = sequence.signal;
+    
+    [signal subscribeNext:^(id x) {
+        // 此处会执行4次,因为上面的数组中是6个元素，但是被过滤掉了2个
+        NSLog(@"%@", x);
+    }];
+    
+    NSDictionary *dic = @{
+        @"name" : @"Zero",
+        @"sex" : @"man",
+        @"age" : @"100",
+        @"hobby" : @"cartoon"
+    };
+    
+    [[dic rac_sequence].signal subscribeNext:^(RACTuple *x) {
+        RACTupleUnpack(NSString *key, NSString *value) = x;
+        NSLog(@"key:%@, value:%@", key, value);
+    }];
+    
+    // 类似于`RACStream`类中的`scanWithStart:reduce:`方法
+    // `block`中的第一个参数`accumulator`就是上一次执行`block`后返回的结果，而第二个参数`value`则是下一次执行时`sequence`中的下一个值
+    [[@[@0, @1, @2, @3, @4, @5] rac_sequence] foldLeftWithStart:@100 reduce:^id(id accumulator, id value) {
+        NSInteger count = [accumulator integerValue] + [value integerValue];
+        return @(count);
+    }];
+}
+
+#pragma mark - ------------------------
 #pragma mark - Search
 
 - (void)search
