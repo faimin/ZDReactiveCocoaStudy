@@ -1041,6 +1041,7 @@
         pushVC.command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
             return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
                 [subscriber sendNext:@(++i)];
+                //warning: 这里如果不调用`sendCompleted`方法的话，会出现按钮的`enabled`状态会变为`NO`，所以在信号发送完之后一定要调用发送完毕或者错误的方法。
                 [subscriber sendCompleted];
                 return [RACDisposable disposableWithBlock:^{
                     NSLog(@"点击按钮信号释放了");
