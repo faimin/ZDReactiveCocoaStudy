@@ -33,6 +33,8 @@ inhibit_all_warnings!
 
 + [`Halfrost's Field`分析`ReactiveCocoa`的系列文章](http://www.tuicool.com/sites/NRbMbqa)
 
++ [`draveness`分析`ReactiveCocoa`的系列文章](http://draveness.me/racsubject/)
+
 + [ReactiveCocoa、RxSwift函数速查手册](https://github.com/aiqiuqiu/FRPCheatSheeta)
 
 + [ReactiveCocoa2源码浅析](http://nathanli.cn/2015/08/27/reactivecocoa2-%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/)
@@ -41,7 +43,11 @@ inhibit_all_warnings!
 
 + [RxSwift入坑手册](http://blog.callmewhy.com/2015/09/21/rxswift-getting-started-0/)
 
-+ `LearningRxSwift`: [https://github.com/pepaslabs/LearningRxSwift](https://github.com/pepaslabs/LearningRxSwift)
++ [RxSwiftExample](https://github.com/DroidsOnRoids/RxSwiftExamples)
+
++ [LearningRxSwift](https://github.com/pepaslabs/LearningRxSwift)
+
+
 
 
 

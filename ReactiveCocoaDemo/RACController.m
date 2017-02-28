@@ -369,8 +369,6 @@
 /// 返回一个新的数组，该数组是通过把所有 arrayX 参数添加到 arrayObject 中生成的。如果要进行 concat() 操作的参数是数组，那么添加的是数组中的元素，而不是数组。
 ///
 /// [A concat:B]中只有A信号执行完complete之后才会执行B，如果A失败（比如执行了sendError），则B永远不会执行
-///
-/// A和B像皇上和太子的关系，A是皇上，B是太子。皇上健在的时候统治天下发号施令（value），太子就候着，不发号施令（value），当皇上挂了（completed），太子登基当皇上，此时发出的号令（value）是太子的。
 - (void)concat
 {
     RACSequence *letters =
@@ -500,6 +498,7 @@
 /// 信号被`publish`的真实操作看源码可知：
 /// 先创建一个`RACSubject`对象，来作为热信号，然后调用`multicast`方法，通过这个`subject`对象和`源信号`作为参数又创建了一个`RACMulticastConnection`对象，
 /// 当调用`connect`方法时，`subject`会订阅`源信号`，即self。
+/// 具体原理请移步`README`
 - (void)mutableConnection
 {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
