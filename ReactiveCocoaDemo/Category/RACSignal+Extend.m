@@ -8,6 +8,10 @@
 
 #import "RACSignal+Extend.h"
 
+static double lastTime = 0;
+@interface RACSignal ()
+@end
+
 @implementation RACSignal (Extend)
 
 - (RACSignal *)serialCollect:(NSArray<RACSignal *> *)signals {
@@ -21,17 +25,20 @@
     return [[[RACSignal concat:signalsArr] collect] setNameWithFormat:@"[%@] -serialCollect: %@", self.name, signals];
 }
 
-- (RACSignal *)filterEvent:(NSTimeInterval)interval {
-    RACSignal *hotSignal = [self replayLast];
-    __block double lastTime = 0;
-    return [[[hotSignal take:1] concat:[[hotSignal skip:1] filter:^BOOL(id value) {
+- (RACSignal *)filterEventWithInterval:(NSTimeInterval)interval {
+    //RACSignal *hotSignal = [self replayLast];
+    //[[self take:1] concat:[self skip:1]];
+    return [[self filter:^BOOL(id value) {
         double currentTime = CFAbsoluteTimeGetCurrent();
         if (lastTime > 0 && currentTime - lastTime > interval) {
             lastTime = CFAbsoluteTimeGetCurrent();
             return YES;
         }
-        return NO;
-    }]] setNameWithFormat:@"[%@] -filterEvent: %@", self.name, self];
+        else {
+            lastTime = currentTime;
+            return NO;
+        }
+    }] setNameWithFormat:@"[%@] -filterEventWithInterval: %@", self.name, self];
 }
 
 @end

@@ -84,12 +84,12 @@
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/ReactiveCocoaDemo/RACController.m"
-                  timestampString = "506503991.246929"
+                  timestampString = "511932288.510942"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "199"
                   endingLineNumber = "199"
-                  offsetFromSymbolStart = "92">
+                  offsetFromSymbolStart = "75">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -99,12 +99,12 @@
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/ReactiveCocoaDemo/RACController.m"
-                  timestampString = "506503991.248198"
+                  timestampString = "511932288.513168"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "200"
                   endingLineNumber = "200"
-                  offsetFromSymbolStart = "60">
+                  offsetFromSymbolStart = "51">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -132,12 +132,12 @@
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/ReactiveCocoaDemo/RACController.m"
-                  timestampString = "506503991.250524"
+                  timestampString = "511932288.519352"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "203"
                   endingLineNumber = "203"
-                  offsetFromSymbolStart = "172">
+                  offsetFromSymbolStart = "148">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -147,12 +147,12 @@
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/ReactiveCocoaDemo/RACController.m"
-                  timestampString = "506503991.251622"
+                  timestampString = "511932288.520596"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "203"
                   endingLineNumber = "203"
-                  offsetFromSymbolStart = "64">
+                  offsetFromSymbolStart = "51">
                </Location>
                <Location
                   shouldBeEnabled = "Yes"
@@ -162,12 +162,12 @@
                   moduleName = "ReactiveCocoaDemo"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/fuxianchao/MyGit/ZDReactiveCocoaDemo/ReactiveCocoaDemo/RACController.m"
-                  timestampString = "506503991.25271"
+                  timestampString = "511932288.522178"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "203"
                   endingLineNumber = "203"
-                  offsetFromSymbolStart = "36">
+                  offsetFromSymbolStart = "29">
                </Location>
             </Locations>
          </BreakpointContent>
@@ -233,22 +233,6 @@
                   offsetFromSymbolStart = "56">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Pods/ReactiveCocoa/ReactiveCocoa/RACSequence.m"
-            timestampString = "506505529.084095"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "341"
-            endingLineNumber = "341"
-            landmarkName = "-countByEnumeratingWithState:objects:count:"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

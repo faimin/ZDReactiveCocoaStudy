@@ -14,6 +14,6 @@
 - (RACSignal *)serialCollect:(NSArray<RACSignal *> *)signals;
 
 /// 防止按钮被连续点击
-- (RACSignal *)filterEvent:(NSTimeInterval)interval;
+- (RACSignal *)filterEventWithInterval:(NSTimeInterval)interval;
 
 @end

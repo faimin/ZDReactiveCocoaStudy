@@ -7,10 +7,11 @@
 //
 
 #import "PushController.h"
-
+#import "RACSignal+Extend.h"
 
 @interface PushController ()
 @property (weak, nonatomic) IBOutlet UIButton *okButton;
+@property (weak, nonatomic) IBOutlet UIButton *testButton;
 @end
 
 @implementation PushController
@@ -41,6 +42,19 @@
 }
 
 - (void)filterButtonAction {
+    
+    RACSignal *buttonSignal_ = [self.okButton rac_signalForControlEvents:UIControlEventTouchUpInside];
+    [[buttonSignal_ filterEventWithInterval:1.5] subscribeNext:^(id x) {
+        NSLog(@"XXXXXXXXX");
+    }];
+    
+    
+    [[[self.testButton rac_signalForControlEvents:UIControlEventTouchUpInside] filterEventWithInterval:2] subscribeNext:^(id x) {
+        NSLog(@"************");
+    }];
+    
+    return;
+    
     RACSignal *buttonSignal = [[self.okButton rac_signalForControlEvents:UIControlEventTouchUpInside] replayLast];
     //**方案1
     [[[buttonSignal take:1] concat:[[buttonSignal skip:1] throttle:0.3]] subscribeNext:^(id x) {
