@@ -15,27 +15,21 @@ PODS:
   - AFNetworking/UIKit (3.0.4):
     - AFNetworking/NSURLSession
   - FDStackView (1.0)
-  - Masonry (1.0.1)
-  - ReactiveCocoa (2.5):
-    - ReactiveCocoa/UI (= 2.5)
-  - ReactiveCocoa/Core (2.5):
-    - ReactiveCocoa/no-arc
-  - ReactiveCocoa/no-arc (2.5)
-  - ReactiveCocoa/UI (2.5):
-    - ReactiveCocoa/Core
+  - Masonry (1.0.2)
+  - ReactiveObjC (2.1.2)
 
 DEPENDENCIES:
   - AFNetworking (~> 3.0.4)
   - FDStackView
   - Masonry
-  - ReactiveCocoa (~> 2.5)
+  - ReactiveObjC
 
 SPEC CHECKSUMS:
   AFNetworking: a0075feb321559dc78d9d85b55d11caa19eabb93
   FDStackView: 3a4bbe0ce9c35e974246a585168b9da8c32213f1
-  Masonry: a1a931a0d08870ed8ae415a2ea5ea68ebcac77df
-  ReactiveCocoa: e2db045570aa97c695e7aa97c2bcab222ae51f4a
+  Masonry: 7c429b56da9d4ee0bbb3ed77a5ea710d6a5df39e
+  ReactiveObjC: 7b6782ae39f9ac0f57205c3b0c0b69b9dd7048c0
 
-PODFILE CHECKSUM: c4050e3c35dc8c124c4f1e122c7ed9bef9474f62
+PODFILE CHECKSUM: f57924c6873e486d713a354924bf026d1e0fd71a
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.2.0

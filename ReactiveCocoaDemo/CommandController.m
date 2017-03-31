@@ -7,7 +7,7 @@
 //
 
 #import "CommandController.h"
-#import <ReactiveCocoa/ReactiveCocoa.h>
+#import <ReactiveObjC/ReactiveObjC.h>
 #import "ZDAFNetWorkHelper.h"
 
 

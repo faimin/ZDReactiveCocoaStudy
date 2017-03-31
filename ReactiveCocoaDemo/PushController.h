@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ReactiveCocoa.h"
+#import <ReactiveObjC/ReactiveObjC.h>
 
 static NSString *const kNotification = @"notification";
 

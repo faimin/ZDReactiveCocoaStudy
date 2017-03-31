@@ -10,7 +10,7 @@
 
 #import "RACController.h"
 #import "PushController.h"
-#import <ReactiveCocoa/ReactiveCocoa.h>
+#import <ReactiveObjC/ReactiveObjC.h>
 #import "ZDAFNetWorkHelper.h"
 
 #define FORMATSTRING(FORMAT, ...)                   \
@@ -176,15 +176,15 @@
         }];
     }];
     
-    RACSignal *signalB = [signalA bind:^RACStreamBindBlock{
+    RACSignal *signalB = [signalA bind:^RACSignalBindBlock _Nonnull{
         // 下面这个block的回调时机是：
         // 下面的bindBlock是在signalA的subscribeNext的block中回调的，所以当signalA被订阅且signalA发送值后，bindBlock会发生回调，然后回调的第一个参数是signalA发送过来的值，也就是说下面bindBlock中参数value的值即为 @"2017年01月17日15:38:04"
-        RACStream *(^BindBlock) (id value, BOOL *stop) = ^RACStream * (id value, BOOL *stop) {
+        RACSignal *(^bindBlock) (id value, BOOL *stop) = ^RACSignal * (id value, BOOL *stop) {
             NSString *componentString = [NSString stringWithFormat:@"%@, 哈咪", value];
             RACSignal *signal = [RACSignal return:componentString];
             return signal;
         };
-        return BindBlock;
+        return bindBlock;
     }];
     
     [signalB subscribeNext:^(id x) {
@@ -196,13 +196,13 @@
 {
     RACSignal *signal = [RACSignal return:@"你好"];
     
-    [[signal flattenMap:^RACStream *(NSString *value) {
+    [[signal flattenMap:^__kindof RACSignal * _Nullable(id  _Nullable value) {
         RACSignal *innerSignal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
             [subscriber sendNext:[value stringByAppendingString:@",我是内部信号中的值"]];
             return nil;
         }];
         return innerSignal;
-    }] subscribeNext:^(id x) {
+    }] subscribeNext:^(id  _Nullable x) {
         NSLog(@"%@", x);
     }];
 }
@@ -726,12 +726,12 @@
 
 ///  把信号转化成事件
 - (void)materialize
-{
-    [self.showTextButton.rac_command.executionSignals flattenMap:^RACStream *(RACSignal *subscribeSignal) {
+{    
+    [self.showTextButton.rac_command.executionSignals flattenMap:^__kindof RACSignal * _Nullable(RACSignal<id> * _Nullable value) {
         // materialize 把信号转化成事件
-        return [[[subscribeSignal materialize] filter:^BOOL(RACEvent *event) {
-            return event.finished;
-        }] map:^id(id value) {
+        return [[[value materialize] filter:^BOOL(RACEvent<id> * _Nullable value) {
+            return value.finished;
+        }] map:^id _Nullable(RACEvent<id> * _Nullable value) {
             return NSLocalizedString(@"Thanks", @"谢谢");
         }];
     }];

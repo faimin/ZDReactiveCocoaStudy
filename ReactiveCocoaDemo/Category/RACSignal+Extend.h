@@ -6,7 +6,7 @@
 //  Copyright © 2016年 zd. All rights reserved.
 //
 
-#import <ReactiveCocoa/ReactiveCocoa.h>
+#import <ReactiveObjC/ReactiveObjC.h>
 
 @interface RACSignal (Extend)
 
