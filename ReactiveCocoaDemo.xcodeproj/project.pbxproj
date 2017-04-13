@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B3530E833EF1662EE266C1D /* libPods-ReactiveCocoaDemoTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 324BA83FB8937E1573F560AE /* libPods-ReactiveCocoaDemoTests.a */; };
 		BC1E46BC1B88B99700838AEF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46BB1B88B99700838AEF /* main.m */; };
 		BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46BE1B88B99700838AEF /* AppDelegate.m */; };
 		BC1E46C21B88B99700838AEF /* RACController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC1E46C11B88B99700838AEF /* RACController.m */; };
@@ -33,8 +34,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0657D9732016450BA0948B16 /* Pods-ReactiveCocoaDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveCocoaDemoTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveCocoaDemoTests/Pods-ReactiveCocoaDemoTests.release.xcconfig"; sourceTree = "<group>"; };
+		324BA83FB8937E1573F560AE /* libPods-ReactiveCocoaDemoTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ReactiveCocoaDemoTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		33CC510B58DD2AC2C644D94D /* libPods-ReactiveCocoaDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ReactiveCocoaDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		36E117903DF9890BCD5B707E /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		ABECBE6DC477C49FF4D16C39 /* Pods-ReactiveCocoaDemoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveCocoaDemoTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveCocoaDemoTests/Pods-ReactiveCocoaDemoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		BC1E46B61B88B99700838AEF /* ReactiveCocoaDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReactiveCocoaDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC1E46BA1B88B99700838AEF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BC1E46BB1B88B99700838AEF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -75,6 +79,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B3530E833EF1662EE266C1D /* libPods-ReactiveCocoaDemoTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,6 +91,7 @@
 			children = (
 				36E117903DF9890BCD5B707E /* Pods.framework */,
 				33CC510B58DD2AC2C644D94D /* libPods-ReactiveCocoaDemo.a */,
+				324BA83FB8937E1573F560AE /* libPods-ReactiveCocoaDemoTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -95,6 +101,8 @@
 			children = (
 				E75AFE70085149D2DC735C1F /* Pods-ReactiveCocoaDemo.debug.xcconfig */,
 				CA14E16FA232FD61FCAE838B /* Pods-ReactiveCocoaDemo.release.xcconfig */,
+				ABECBE6DC477C49FF4D16C39 /* Pods-ReactiveCocoaDemoTests.debug.xcconfig */,
+				0657D9732016450BA0948B16 /* Pods-ReactiveCocoaDemoTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -213,9 +221,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = BC1E46DC1B88B99700838AEF /* Build configuration list for PBXNativeTarget "ReactiveCocoaDemoTests" */;
 			buildPhases = (
+				76E1A79CF59F65FB80924B92 /* [CP] Check Pods Manifest.lock */,
 				BC1E46CB1B88B99700838AEF /* Sources */,
 				BC1E46CC1B88B99700838AEF /* Frameworks */,
 				BC1E46CD1B88B99700838AEF /* Resources */,
+				6C778B57DFDDCEF622116436 /* [CP] Embed Pods Frameworks */,
+				B63688CE6BEF2DF5937BEE3E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -298,7 +309,52 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		6C778B57DFDDCEF622116436 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ReactiveCocoaDemoTests/Pods-ReactiveCocoaDemoTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		76E1A79CF59F65FB80924B92 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		B63688CE6BEF2DF5937BEE3E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ReactiveCocoaDemoTests/Pods-ReactiveCocoaDemoTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		C4DB04D857D0821BC765220B /* [CP] Copy Pods Resources */ = {
@@ -506,6 +562,7 @@
 		};
 		BC1E46DD1B88B99700838AEF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = ABECBE6DC477C49FF4D16C39 /* Pods-ReactiveCocoaDemoTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -526,6 +583,7 @@
 		};
 		BC1E46DE1B88B99700838AEF /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0657D9732016450BA0948B16 /* Pods-ReactiveCocoaDemoTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
