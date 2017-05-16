@@ -16,4 +16,6 @@
 /// 防止按钮被连续点击
 - (RACSignal *)filterEventWithInterval:(NSTimeInterval)interval;
 
+- (RACSignal *)shareWhileActive;
+
 @end
