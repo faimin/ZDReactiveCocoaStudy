@@ -8,55 +8,46 @@
 
 #import "TableViewController.h"
 #import "RACController.h"
+#import <ReactiveObjC/ReactiveObjC.h>
 
 @interface TableViewController ()
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (nonatomic, strong) NSArray *data;
 @end
 
 @implementation TableViewController
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.data = @[
-        @"bind",
-        @"flattenMap",
-        @"flatten",
-        @"map",
-        @"zip",
-        @"merge",
-        @"combineLatestReduce",
-        @"concat",
-        @"then",
-        @"replay",
-        @"replayLazily",
-        @"mutableConnection",
-        @"deliverOn",
-        @"distinctUntilChanged",
-        @"throttle",
-        @"ignore",
-        @"ignoreValues",
-        @"skip",
-        @"take",
-        @"takeUntil",
-        @"timer",
-        @"switchToLatest",
-        @"materialize",
-        @"liftSelector",
-        @"collect",
-        @"scanWithStart",
-        @"combinePreviousWithStart",
-        @"aggregate",
-        @"bufferWithTime",
-        @"channel",
-        @"reduceApply",
-        @"sequence"
-    ];
+    
+    [self setupTableDelegate];
 }
 
-- (void)didReceiveMemoryWarning {
+- (void)didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)setupTableDelegate
+{
+    @weakify(self);
+    [[self rac_signalForSelector:@selector(tableView:didSelectRowAtIndexPath:) fromProtocol:@protocol(UITableViewDelegate)] subscribeNext:^(RACTuple * _Nullable x) {
+        @strongify(self);
+        NSIndexPath *indexPath = x.second;
+        RACController *racController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:NSStringFromClass([RACController class])];
+        racController.type = indexPath.row;
+        racController.navigationItem.title = self.data[indexPath.row];
+#ifdef NSFoundationVersionNumber_iOS_8_0
+        [self.navigationController showViewController:racController sender:self];
+#else
+        [self.navigationController pushViewController:racController animated:YES];
+#endif
+    }];
+    // delegate must set on behind of `-rac_signalForSelector:fromProtocol:`
+    self.tableView.delegate = (id<UITableViewDelegate>)self;
 }
 
 #pragma mark - UITableViewDataSource && UITableViewDelegate
@@ -84,23 +75,48 @@
     return cell;
 }
 
-//- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-//{
-//    return <#expression#>;
-//}
+#pragma mark - Getter
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (NSArray *)data
 {
-    RACController *racController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:NSStringFromClass([RACController class])];
-    racController.type = indexPath.row;
-    racController.navigationItem.title = self.data[indexPath.row];
-#ifdef NSFoundationVersionNumber_iOS_8_0
-    [self.navigationController showViewController:racController sender:self];
-#else
-    [self.navigationController pushViewController:racController animated:YES];
-#endif
+    if (!_data) {
+        _data = @[
+          @"bind",
+          @"flattenMap",
+          @"flatten",
+          @"map",
+          @"zip",
+          @"merge",
+          @"combineLatestReduce",
+          @"concat",
+          @"then",
+          @"replay",
+          @"replayLazily",
+          @"mutableConnection",
+          @"deliverOn",
+          @"distinctUntilChanged",
+          @"throttle",
+          @"ignore",
+          @"ignoreValues",
+          @"skip",
+          @"take",
+          @"takeUntil",
+          @"timer",
+          @"switchToLatest",
+          @"materialize",
+          @"liftSelector",
+          @"collect",
+          @"scanWithStart",
+          @"combinePreviousWithStart",
+          @"aggregate",
+          @"bufferWithTime",
+          @"channel",
+          @"reduceApply",
+          @"sequence"
+        ];
+    }
+    return _data;
 }
-
 
 /*
 #pragma mark - Navigation

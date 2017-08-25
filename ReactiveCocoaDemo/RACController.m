@@ -727,13 +727,15 @@
 ///  把信号转化成事件
 - (void)materialize
 {    
-    [self.showTextButton.rac_command.executionSignals flattenMap:^__kindof RACSignal * _Nullable(RACSignal<id> * _Nullable value) {
+    [[self.showTextButton.rac_command.executionSignals flattenMap:^__kindof RACSignal * _Nullable(RACSignal<id> * _Nullable value) {
         // materialize 把信号转化成事件
         return [[[value materialize] filter:^BOOL(RACEvent<id> * _Nullable value) {
             return value.finished;
         }] map:^id _Nullable(RACEvent<id> * _Nullable value) {
             return NSLocalizedString(@"Thanks", @"谢谢");
         }];
+    }] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"%@", x);
     }];
 }
 
