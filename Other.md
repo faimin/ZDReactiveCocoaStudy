@@ -128,14 +128,11 @@ UIView * scrollViewContentView = [[UIView alloc] init];
 scrollViewContentView.backgroundColor = [UIColor yellowColor];
 [scrollView addSubview:scrollViewContentView];
 
-@weakify(self);
 [scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
-    @strongify(self);
-        make.edges.equalTo(self.view).insets(UIEdgeInsetsMake(80, 80, 80, 80));
+    make.edges.equalTo(self.view).insets(UIEdgeInsetsMake(80, 80, 80, 80));
 }];
 
 [scrollViewContentView mas_makeConstraints:^(MASConstraintMaker *make) {
-    @strongify(self);
     make.edges.equalTo(scrollView);
     make.size.mas_equalTo(CGSizeMake(CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame)));
 }];
@@ -190,7 +187,6 @@ scrollViewContentView.backgroundColor = [UIColor yellowColor];
 }
 ```
 
-
 #### 2.信号的处理：
 
 `map：`
@@ -201,23 +197,16 @@ scrollViewContentView.backgroundColor = [UIColor yellowColor];
 
 ```objc
 [[[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-    
     [[RACScheduler mainThreadScheduler]afterDelay:3 schedule:^{
-        
         [subscriber sendNext:@"rac"];
         [subscriber sendCompleted];
     }];
-    
     return nil;
-}] timeout:2 onScheduler:[RACScheduler mainThreadScheduler]]
-subscribeNext:^(id x) {
-    
+}] timeout:2 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id x) {
     LxDBAnyVar(x);
 } error:^(NSError *error) {
-    
     LxDBAnyVar(error);
 } completed:^{
-    
     LxPrintAnything(completed);
 }];
 ```
@@ -240,9 +229,7 @@ UITextField * textField = [[UITextField alloc]init];
 textField.backgroundColor = [UIColor cyanColor];
 [self.view addSubview:textField];
 
-@weakify(self); 
 [textField mas_makeConstraints:^(MASConstraintMaker *make) {
-    @strongify(self);  
     make.size.mas_equalTo(CGSizeMake(180, 40));
     make.center.equalTo(self.view);
 }];
