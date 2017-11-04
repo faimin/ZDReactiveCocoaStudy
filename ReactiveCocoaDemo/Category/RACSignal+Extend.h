@@ -2,7 +2,7 @@
 //  RACSignal+Extend.h
 //  ReactiveCocoaDemo
 //
-//  Created by 符现超 on 16/8/2.
+//  Created by Zero.D.Saber on 16/8/2.
 //  Copyright © 2016年 zd. All rights reserved.
 //
 
