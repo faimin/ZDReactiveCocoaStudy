@@ -1,23 +1,33 @@
-##ReactiveCocoa资料汇总
-###FRP Lib
+## ReactiveCocoa资料汇总
+
+### FRP Lib
+
 `ReactiveCocoa` : [https://github.com/ReactiveCocoa/ReactiveCocoa
-](https://github.com/ReactiveCocoa/ReactiveCocoa
-)
+](https://github.com/ReactiveCocoa/ReactiveCocoa)
+
 `Objective-Chain`: [https://github.com/iMartinKiss/Objective-Chain](https://github.com/iMartinKiss/Objective-Chain)
+
 `RZDataBinding`: [https://github.com/Raizlabs/RZDataBinding](https://github.com/Raizlabs/RZDataBinding)
+
 `BIND`： [https://github.com/markohlebar/BIND](https://github.com/markohlebar/BIND)
 
 `RxSwift(swift)`: [https://github.com/ReactiveX/RxSwift](https://github.com/ReactiveX/RxSwift)
+
 `SignalKit(swift)`: [https://github.com/yankodimitrov/SignalKit](https://github.com/yankodimitrov/SignalKit)  
+
 `LearningRxSwift(Swift)`: [https://github.com/pepaslabs/LearningRxSwift](https://github.com/pepaslabs/LearningRxSwift)
+
 `Interstellar(swift)`: [https://github.com/JensRavens/Interstellar](https://github.com/JensRavens/Interstellar)
+
 `Bond(swift)`: [https://github.com/SwiftBond/Bond](https://github.com/SwiftBond/Bond)
 
 `NSObject-Rx`: [https://github.com/ashfurrow/NSObject-Rx](https://github.com/ashfurrow/NSObject-Rx)
+
 `Action`：[https://github.com/RxSwiftCommunity/Action](https://github.com/RxSwiftCommunity/Action)
 
 --------
 `CETableViewBinding`: [https://github.com/ColinEberhardt/CETableViewBinding](https://github.com/ColinEberhardt/CETableViewBinding)
+
 `HFTableCollectionBindingHelper`: [https://github.com/haifengkao/HFTableCollectionBindingHelper](https://github.com/haifengkao/HFTableCollectionBindingHelper)
 
 #### Pod使用
@@ -28,7 +38,7 @@ use_frameworks!
 inhibit_all_warnings!
 ```
 
-###资料
+### 资料
 + [RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe)
 
 + [`Halfrost's Field`分析`ReactiveCocoa`的系列文章](http://www.tuicool.com/sites/NRbMbqa)
