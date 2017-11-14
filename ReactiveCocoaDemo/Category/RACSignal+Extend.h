@@ -18,4 +18,6 @@
 
 - (RACSignal *)shareWhileActive;
 
+- (RACSignal *)continueInBackground;
+
 @end

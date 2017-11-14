@@ -4,20 +4,19 @@
 //
 //  Created by Zero.D.Saber on 16/8/2.
 //  Copyright © 2016年 zd. All rights reserved.
-//
+//  
+//  http://www.enhgo.com/search?q=RACSignal
 
 #import "RACSignal+Extend.h"
-
-static double lastTime = 0;
-@interface RACSignal ()
-@end
 
 @implementation RACSignal (Extend)
 
 - (RACSignal *)serialCollect:(NSArray<RACSignal *> *)signals {
-    NSParameterAssert(signals);
+    NSCParameterAssert(signals.count);
+    if (!signals.count) return self;
+    
     NSMutableArray *signalsArr = ({
-        NSMutableArray *mutArr = @[].mutableCopy;
+        NSMutableArray<RACSignal *> *mutArr = @[].mutableCopy;
         [mutArr addObject:self];
         [mutArr addObjectsFromArray:signals];
         mutArr;
@@ -28,14 +27,15 @@ static double lastTime = 0;
 - (RACSignal *)filterEventWithInterval:(NSTimeInterval)interval {
     //RACSignal *hotSignal = [self replayLast];
     //[[self take:1] concat:[self skip:1]];
+    static double lastTime = 0.0;
+    
     return [[self filter:^BOOL(id value) {
         double currentTime = CFAbsoluteTimeGetCurrent();
-        if (lastTime > 0 && currentTime - lastTime > interval) {
+        if ( lastTime == 0 || (lastTime > 0 && currentTime - lastTime >= interval) ) {
             lastTime = CFAbsoluteTimeGetCurrent();
             return YES;
         }
         else {
-            lastTime = currentTime;
             return NO;
         }
     }] setNameWithFormat:@"[%@] -filterEventWithInterval: %@", self.name, self];
@@ -93,6 +93,52 @@ static double lastTime = 0;
                  }];
              }]
             setNameWithFormat:@"[%@] -shareWhileActive", self.name];
+}
+
+// http://www.enhgo.com/snippet/objective-c/racsignalcontinueinbackgroundm_neilpa_objective-c
+- (RACSignal *)continueInBackground
+{
+    return [[RACSignal createSignal:^(id<RACSubscriber> subscriber) {
+        UIApplication *app = UIApplication.sharedApplication;
+        
+        __block UIBackgroundTaskIdentifier taskID;
+        RACCompoundDisposable *compoundDisposable = [RACCompoundDisposable compoundDisposable];
+        RACDisposable *backgroundTaskDisposable = [RACDisposable disposableWithBlock:^{
+            [app endBackgroundTask:taskID];
+        }];
+        
+        // To ensure the background task isn't ended before the error or completed event
+        // is delivered we have to remove the background disposable from our compound
+        // disposable. Otherwise, the internal signal executes the disposable before actually
+        // invoking the error or completion blocks. As such, we have to do this dance with
+        // the background disposable.
+        
+        taskID = [app beginBackgroundTaskWithExpirationHandler:^{
+            NSLog(@"Background task timed out.");
+            [compoundDisposable removeDisposable:backgroundTaskDisposable];
+            [subscriber sendError:[NSError errorWithDomain:RACSignalErrorDomain code:RACSignalErrorTimedOut userInfo:nil]];
+            [backgroundTaskDisposable dispose];
+        }];
+        
+        RACDisposable *subscriptionDisposable = [self subscribeNext:^(id x) {
+            [subscriber sendNext:x];
+        } error:^(NSError *error) {
+            [compoundDisposable removeDisposable:backgroundTaskDisposable];
+            [subscriber sendError:error];
+            [backgroundTaskDisposable dispose];
+        } completed:^{
+            [compoundDisposable removeDisposable:backgroundTaskDisposable];
+            [subscriber sendCompleted];
+            [backgroundTaskDisposable dispose];
+        }];
+        
+        // Add the background disposable last since it should run after the subscription
+        // is cleaned up.
+        [compoundDisposable addDisposable:subscriptionDisposable];
+        [compoundDisposable addDisposable:backgroundTaskDisposable];
+        return compoundDisposable;
+    }]
+    setNameWithFormat:@"[%@] -continueInBackground", self.name];
 }
 
 @end
