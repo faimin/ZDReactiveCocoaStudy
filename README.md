@@ -4,7 +4,14 @@
 >* [RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe) 
 >* [细说ReactiveCocoa的冷信号与热信号（三）：怎么处理冷信号与热信号](http://tech.meituan.com/talk-about-reactivecocoas-cold-signal-and-hot-signal-part-3.html) 
 
-P.S：本文有些地方是参考上面推荐的文章来理解的，感谢**godyZ**和**美团团队**。
+P.S：本文有些地方是参考上面推荐的文章来理解的，感谢大佬发表的优秀文章。
+
+> 冷信号与热信号：
+> 1. Hot Observable是主动的，尽管你并没有订阅事件，但是它会时刻推送，就像鼠标移动；而Cold Observable是被动的，只有当你订阅的时候，它才会发布消息。
+> 2. Hot Observable可以有多个订阅者，是一对多，集合可以与订阅者共享信息；而Cold Observable只能一对一，当有不同的订阅者，消息是重新完整发送。
+> 3. 冷信号可以理解为`点播`，每次订阅都从头开始；热信号可以理解为`直播`，订阅时从当前的状态开始；
+
+------
 
 >* `map`和`flatten`是基于`flattenMap`,而`flattenMap`是基于`bind:`,所以在此之前先来看看`bind`函数。
 >* 具体来看源码（为方便理解，去掉了源代码中`RACDisposable`, `@synchronized`, `@autoreleasepool`相关代码)。当新信号`N`被外部订阅时，会进入信号`N`的`didSubscribeBlock` (1)，之后订阅原信号`O` (2)，当原信号`O`有值输出后就用`bind`函数传入的`bindBlock`将其变换成中间信号`M` (3), 并马上对其进行订阅(4)，最后将中间信号`M`的输出作为新信号`N`的输出 (5)。即：当新生成的信号被订阅时，源信号也会立即被订阅。
