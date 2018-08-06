@@ -25,12 +25,14 @@
 
 `Action`：[https://github.com/RxSwiftCommunity/Action](https://github.com/RxSwiftCommunity/Action)
 
---------
+---
+
 `CETableViewBinding`: [https://github.com/ColinEberhardt/CETableViewBinding](https://github.com/ColinEberhardt/CETableViewBinding)
 
 `HFTableCollectionBindingHelper`: [https://github.com/haifengkao/HFTableCollectionBindingHelper](https://github.com/haifengkao/HFTableCollectionBindingHelper)
 
 #### Pod使用
+
 ```objc
 pod 'ReactiveCocoa', '~> 2.5'
 pod 'ReactiveCocoa', '~> 3.0.0-alpha.1'
@@ -39,6 +41,7 @@ inhibit_all_warnings!
 ```
 
 ### 资料
+
 + [RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe)
 
 + [`Halfrost's Field`分析`ReactiveCocoa`的系列文章](http://www.tuicool.com/sites/NRbMbqa)
@@ -56,8 +59,3 @@ inhibit_all_warnings!
 + [RxSwiftExample](https://github.com/DroidsOnRoids/RxSwiftExamples)
 
 + [LearningRxSwift](https://github.com/pepaslabs/LearningRxSwift)
-
-
-
-
-
