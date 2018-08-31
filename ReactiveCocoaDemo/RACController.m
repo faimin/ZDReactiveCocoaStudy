@@ -834,27 +834,28 @@
     NSLog(@"%@", sequeue.array);
 }
 
-/// 聚合
+/// 聚合，与 combinePreviousWithStart:reduce: 相似
 - (void)aggregate
 {
-    RACSignal *numbers = @[@(0), @(1), @(2)].rac_sequence.signal;
+    RACSignal *numbers = @[ @(0), @(1), @(2) ].rac_sequence.signal;
     [[numbers aggregateWithStartFactory:^id{
         return [[NSMutableArray alloc] init];
     } reduce:^id(NSMutableArray *running, id next) {
         [running addObject:next ?: [NSNull null]];
         return running;
-    }] subscribeNext:^(id x) {
-        NSLog(@"%@", x);
+    }] subscribeNext:^(NSArray *x) {
+        NSLog(@"%@", x);    // print (0, 1, 2)
     }];
 }
 
-/// 这个有点像collect,它也是把`sendNext`的所有结果放入一个数组中,然后以tuple结果延迟一次性全部发送;
-/// 不过这里有个地方需要注意的是,从源码可以看到,当订阅者发送`sendCompleted`消息时会立即执行源信号被订阅时346行位置的`completed:`里面的那个block,然后执行`sendCompleted`,然后`timerDisposable`会被dispose,这样那个延迟方法会失效(其实根本就不执行那个方法了)
+/// 这个有点像collect,它也是把`sendNext`的所有结果放入一个数组中,然后把结果转换为tuple类型,最后延迟一次性全部发送;
+/// 不过这里有个地方需要注意的是,从源码可以看到,当订阅者发送`sendCompleted`消息时,会立即执行源信号被订阅时346行位置的`completed:`里面的那个block,然后执行`sendCompleted`,然后`timerDisposable`会被dispose,这样那个延迟方法会失效(其实根本就不执行那个方法了)
 - (void)bufferWithTime
 {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
         [subscriber sendNext:@"2"];
+        [subscriber sendNext:@"100"];
         //[subscriber sendCompleted];
         return nil;
     }];
@@ -866,8 +867,8 @@
         return nil;
     }];
     
-    // finally print 1，2，3，4
-    [[[RACSignal merge:@[signalA, signalB]] bufferWithTime:7 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(id x) {
+    // finally print 1, 2, 100, 3, 4
+    [[[RACSignal merge:@[signalA, signalB]] bufferWithTime:7 onScheduler:[RACScheduler mainThreadScheduler]] subscribeNext:^(RACTuple *x) {
         NSLog(@"%@", x);
     }];
 }
