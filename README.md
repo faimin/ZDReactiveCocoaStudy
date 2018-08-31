@@ -1,6 +1,6 @@
 ### 解读ReactiveCocoa中几个函数
 
-#### 一、bind、flattenMap和map
+#### 一、bind、flattenMap、map以及flatten
 
 > 冷信号与热信号：
 > 
@@ -59,14 +59,14 @@
         ///
         /// 跟`bind：`方法中的代码对应起来如下：
         /// BOOL stop = NO;
-         /// id middleSignal = bindingBlock(x, &stop);
-         ///
-         /// 与上面`bind:`函数中的(3)对应起来,
-         /// 可以看出bindBlock中的x是原信号被subscribe后传出的值，即对应下面的value
-         /// 也即flattenMap中的 block执行后传出的值，
-         /// 即上面的(RACStream * (^ block)(id value))中的value
-         /// flattenMap:后的那个block其实与bind:后的block基本是一样的，参数都是原信号发出的值，返回值都是RACStream，差别就是一个bool参数，所以说，flattenMap其实就是对bind方法进行了一些安全检查
-         /// 综上所述：*flattenMap方法中传进来的那个block参数值就是原信号被订阅后发送的值*
+        /// id middleSignal = bindingBlock(x, &stop);
+        ///
+        /// 与上面`bind:`函数中的(3)对应起来,
+        /// 可以看出bindBlock中的x是原信号被subscribe后传出的值，即对应下面的value
+        /// 也即flattenMap中的 block执行后传出的值，
+        /// 即上面的(RACStream * (^ block)(id value))中的value
+        /// flattenMap:后的那个block其实与bind:后的block基本是一样的，参数都是原信号发出的值，返回值都是RACStream，差别就是一个bool参数，所以说，flattenMap其实就是对bind方法进行了一些安全检查
+        /// 综上所述：*flattenMap方法中传进来的那个block参数值就是原信号被订阅后发送的值*
         return ^(id value, BOOL *stop) {
             // 下面这个value并不是flattenMap后面block中的那个value，而是(就近原则)原信号中的值；flattenMap后面那个block中的value的值是原信号发出的值被转换为中间信号后，又被订阅后发出去的值，这里要区分开；
             id stream = block(value) ?: [class empty];
@@ -94,7 +94,7 @@
 ```
 
 ##### 4. flatten:
-`flatten`: 该操作主要作用于信号的信号。原信号O作为信号的信号，在被订阅时输出的数据必然也是个信号(signalValue)，这往往不是我们想要的。当我们执行[O flatten]操作时，因为flatten内部调用了flattenMap (1)，flattenMap里对应的中间信号就是原信号O输出的signalValue (2)。按照之前分析的经验，在flattenMap操作中新信号N输出的结果就是各中间信号M输出的集合。因此在flatten操作中新信号N被订阅时输出的值就是原信号O的各个子信号输出值的集合。
+`flatten`: 该操作主要作用于信号的信号。原信号`O`作为信号的信号，在被订阅时输出的数据必然也是个信号`(signalValue)`，这往往不是我们想要的。当我们执行`[O flatten]`操作时，因为`flatten`内部调用了`flattenMap` (1)，`flattenMap`里对应的中间信号就是原信号`O`输出的`signalValue` (2)。按照之前分析的经验，在`flattenMap`操作中新信号`N`输出的结果就是各中间信号`M`输出的集合。因此在`flatten`操作中新信号`N`被订阅时输出的值就是原信号`O`的各个子信号输出值的集合。
 
 ```objectivec
 - (instancetype)flatten
@@ -108,8 +108,8 @@
 
 ##### 5. **小结：**
 以前一直不理解`flatten`与`map`之间的区别，然后经过不断在源码中打断点，一步步跟代码，终于是明白了：
-`flatten`和`map`后面的block返回结果其实最终都会变为`bind:`方法中的中间信号，但是`flatten:`的block是直接把原信号发出的值返回来作为中间信号的，所以中间信号被订阅，其实就是原信号发出的值又被订阅，这也就是`flatten:`能拿到信号中的信号中的值的原因。
-而`map:`后面的block是把原信号发出的值加工处理了的，又生成了一个新的信号，即`map:`方法block返回的中间信号已经不是原来的信号中的信号了，而是把原信号发出的值作为它的包含值的一个新的信号，它被订阅时，发送的是原信号发出的那个值，这就是map拿不到原信号中的信号的原因。
+`flatten`和`map`后面的block返回结果其实最终都会变为`bind:`方法中的中间信号，但是`flatten:`的`block`是直接把原信号发出的值返回来作为中间信号的，所以中间信号被订阅，其实就是原信号发出的值又被订阅，这也就是`flatten:`能拿到信号中的信号中的值的原因。
+而`map:`后面的block是把原信号发出的值加工处理了的，又生成了一个新的信号，即`map:`方法`block`返回的中间信号已经不是原来的信号中的信号了，而是把原信号发出的值作为它的包含值的一个新的信号，它被订阅时，发送的是原信号发出的那个值，这就是`map`拿不到原信号中的信号的原因。
 说白了就是`flatten:`操作的始终是原来的信号，而`map:`会生成一个包含原信号发送值的新信号。
 
 ---
@@ -244,8 +244,97 @@
 }
 ```
 
-#### 四、其他：
-说说几个函数
+#### 四、RAC自释放
+`RAC`的自释放其实是`hook`了`dealloc`方法，但是他只是`hook`了当前类的`dealloc`方法，并没有`hook`掉所有对象的`dealloc`方法(比如`NSObject`的`dealloc`方法)，主要实现代码如下：
+
+```objectivec
+static void swizzleDeallocIfNeeded(Class classToSwizzle) {
+	@synchronized (swizzledClasses()) {
+	    // 被hook过的类会加入到这个单例集合中，如果当前类被hook过直接返回，避免重复hook导致问题
+		NSString *className = NSStringFromClass(classToSwizzle);
+		if ([swizzledClasses() containsObject:className]) return;
+     
+        // 获取 dealloc 方法
+		SEL deallocSelector = sel_registerName("dealloc");
+        
+        // 创建 `orignalDealloc` 函数指针，为了保存 `dealloc` 的原始实现，注意这里是__block的，后面才会真正赋值
+		__block void (*originalDealloc)(__unsafe_unretained id, SEL) = NULL;
+
+        // 创建一个新的自定义的 `newDealloc` 函数
+		id newDealloc = ^(__unsafe_unretained id self) {
+		    // 获取当前对象持有的 `compoundDisposable` ，然后调用释放的方法
+		    // 这个方法最终会触发 `rac_willDeallocSignal` 
+			RACCompoundDisposable *compoundDisposable = objc_getAssociatedObject(self, RACObjectCompoundDisposable);
+			[compoundDisposable dispose];
+        
+            // 说明当前对象没有实现dealloc方法，此种情况下直接调用 `[super dealloc]` 方法
+			if (originalDealloc == NULL) {   
+			   // 构造super对象
+				struct objc_super superInfo = {
+					.receiver = self,
+					.super_class = class_getSuperclass(classToSwizzle)
+				};
+
+				void (*msgSend)(struct objc_super *, SEL) = (__typeof__(msgSend))objc_msgSendSuper;
+				msgSend(&superInfo, deallocSelector);
+			} 
+			// 当前对象实现了`dealloc`方法，所以直接调用当前对象自己的`dealloc`方法，即 `[self dealloc]`
+			else {                         
+				originalDealloc(self, deallocSelector);
+			}
+		};
+		
+		// 获取 `newDealloc` 函数（`IMP` 其实质就是 `C` 函数）
+		IMP newDeallocIMP = imp_implementationWithBlock(newDealloc);
+		
+		// 给当前类添加`dealloc`方法，
+		// 如果添加成功，说明当前类没有覆写`dealloc`，
+		// 否则说明，当前类覆写了`dealloc`方法，比如用了`kvo`的时候需要在`dealloc`方法中移除观察者
+		// 如果能够进入 if 判断里说明当前类实现了`dealloc`方法
+		if (!class_addMethod(classToSwizzle, deallocSelector, newDeallocIMP, "v@:")) {
+
+			// 能够执行到这里，说明当前类实现了获取当前类的 `dealloc` Method
+			Method deallocMethod = class_getInstanceMethod(classToSwizzle, deallocSelector);
+			
+			// 替换`dealloc`方法的实现之前，先保存原来的实现，以防正在替换时`dealloc`被调用
+			originalDealloc = (__typeof__(originalDealloc))method_getImplementation(deallocMethod);
+			
+			// We need to store original implementation again, in case it just changed.
+			// 把`dealloc`方法替换为上面新的实现，如果替换成功会返回原来的实现
+			originalDealloc = (__typeof__(originalDealloc))method_setImplementation(deallocMethod, newDeallocIMP);
+		}
+      
+        // 把当前类名添加到集合中
+		[swizzledClasses() addObject:className];
+	}
+}
+```
+
+#### 五、其他：
+下面介绍几个函数
+
+```objectivec
+- (void)dispose {
+	void (^disposeBlock)(void) = NULL;
+
+	while (YES) {
+		void *blockPtr = _disposeBlock;
+		// 比较blockPtr是否与_disposeBlock指针指向的内存位置的值相匹配，如果匹配，则将_disposeBlock指针指向的内存位置设置为中间的NULL；
+		// 整个函数的返回值就是交换是否成功的BOOL值。
+		// 当前这个while循环里只有当OSAtomicCompareAndSwapPtrBarrier返回值为YES时才能退出循环，即&_disposeBlock被置为了NULL，避免了野指针问题
+		if (OSAtomicCompareAndSwapPtrBarrier(blockPtr, NULL, &_disposeBlock)) {
+			if (blockPtr != (__bridge void *)self) {
+				disposeBlock = CFBridgingRelease(blockPtr);
+			}
+
+			break;
+		}
+	}
+
+	if (disposeBlock != nil) disposeBlock();
+}
+```
+
 ```objectivec
 // 以下是对`allowsConcurrentExecution`属性的处理方法，利用了属性的原子性，防止资源竞争，值得学习
 @property (atomic, assign) BOOL allowsConcurrentExecution;
@@ -292,8 +381,6 @@
 }
 
 - (void)addActiveExecutionSignal:(RACSignal *)signal {
-    NSCParameterAssert([signal isKindOfClass:RACSignal.class]);
-
     @synchronized (self) {
         NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:_activeExecutionSignals.count];
         [self willChange:NSKeyValueChangeInsertion valuesAtIndexes:indexes forKey:@keypath(self.activeExecutionSignals)];
@@ -303,8 +390,6 @@
 }
 
 - (void)removeActiveExecutionSignal:(RACSignal *)signal {
-    NSCParameterAssert([signal isKindOfClass:RACSignal.class]);
-
     @synchronized (self) {
         // 从当前数组中获取到要移除的对象的indexSets，如果不存在直接返回
         NSIndexSet *indexes = [_activeExecutionSignals indexesOfObjectsPassingTest:^ BOOL (RACSignal *obj, NSUInteger index, BOOL *stop) {
@@ -320,7 +405,6 @@
 }
 ```
 
----
 #### 附录：
 
 ##### 附1：部分函数的图表解释
@@ -331,7 +415,7 @@
 > ![Merge](http://img1.tuicool.com/U3Mzym3.png)
 > ![Concat](http://img0.tuicool.com/faIv6bu.png)
 
-##### 附2：`ReactiveCocoa`和`RxSwift`API图
+##### 附2：`ReactiveCocoa`和`RxSwift` API图
 > 引用自[FRPCheatSheeta](https://github.com/aiqiuqiu/FRPCheatSheeta)
 
 **1. ReactiveCocoa-ObjC**
@@ -342,7 +426,6 @@
 
 **3. RxSwift**
 ![RXSwift.png](http://ww2.sinaimg.cn/large/006tNbRwjw1f69u2fugtjj317k1n1tis.jpg)
----
 
 #### 参考:
 + [RAC核心元素与信号流](http://www.jianshu.com/p/d262f2c55fbe) 
