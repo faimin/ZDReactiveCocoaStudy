@@ -2,9 +2,9 @@
 platform :ios, '8.0'
 
 def usedPod
-	pod 'ReactiveObjC', '~> 3.0.0'
+	pod 'ReactiveObjC'
 	pod 'Masonry'
-	pod 'AFNetworking', '~> 3.1.0'
+	pod 'AFNetworking'
 	pod 'FDStackView'
 end
 

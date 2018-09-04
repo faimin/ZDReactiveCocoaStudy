@@ -1,35 +1,42 @@
 PODS:
-  - AFNetworking (3.1.0):
-    - AFNetworking/NSURLSession (= 3.1.0)
-    - AFNetworking/Reachability (= 3.1.0)
-    - AFNetworking/Security (= 3.1.0)
-    - AFNetworking/Serialization (= 3.1.0)
-    - AFNetworking/UIKit (= 3.1.0)
-  - AFNetworking/NSURLSession (3.1.0):
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
     - AFNetworking/Reachability
     - AFNetworking/Security
     - AFNetworking/Serialization
-  - AFNetworking/Reachability (3.1.0)
-  - AFNetworking/Security (3.1.0)
-  - AFNetworking/Serialization (3.1.0)
-  - AFNetworking/UIKit (3.1.0):
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
-  - FDStackView (1.0)
-  - Masonry (1.0.2)
-  - ReactiveObjC (3.0.0)
+  - FDStackView (1.0.1)
+  - Masonry (1.1.0)
+  - ReactiveObjC (3.1.0)
 
 DEPENDENCIES:
-  - AFNetworking (~> 3.1.0)
+  - AFNetworking
   - FDStackView
   - Masonry
-  - ReactiveObjC (~> 3.0.0)
+  - ReactiveObjC
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - FDStackView
+    - Masonry
+    - ReactiveObjC
 
 SPEC CHECKSUMS:
-  AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  FDStackView: 3a4bbe0ce9c35e974246a585168b9da8c32213f1
-  Masonry: 7c429b56da9d4ee0bbb3ed77a5ea710d6a5df39e
-  ReactiveObjC: ce79989e8684b9086b5f8d0c74bc7b81a8729c9e
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  FDStackView: fc0697e5be2022c8af36ce66e9e2061006058ba8
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  ReactiveObjC: 2a38ea15335de4119d8b17caf1db1484f61db902
 
-PODFILE CHECKSUM: a704cc067bb3690c396efbe7770eecb7684bd858
+PODFILE CHECKSUM: 3f40ed279fcfe208bb120a5ad77796438771d629
 
-COCOAPODS: 1.2.1
+COCOAPODS: 1.5.3
