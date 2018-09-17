@@ -112,7 +112,8 @@
           @"bufferWithTime",
           @"channel",
           @"reduceApply",
-          @"sequence"
+          @"sequence",
+          @"selectorBindSelector",
         ];
     }
     return _data;

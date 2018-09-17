@@ -21,6 +21,7 @@
 		BCE3E4371C2C0B47000A343A /* PushController.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE3E4361C2C0B47000A343A /* PushController.m */; };
 		BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */; };
 		FA4D2CAABEA40DB4CFDDE282 /* libPods-ReactiveCocoaDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 33CC510B58DD2AC2C644D94D /* libPods-ReactiveCocoaDemo.a */; };
+		FA81F970214FB279007E9EF6 /* RACViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FA81F96F214FB279007E9EF6 /* RACViewModel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -64,6 +65,8 @@
 		BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZDAFNetWorkHelper.m; sourceTree = "<group>"; };
 		CA14E16FA232FD61FCAE838B /* Pods-ReactiveCocoaDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveCocoaDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveCocoaDemo/Pods-ReactiveCocoaDemo.release.xcconfig"; sourceTree = "<group>"; };
 		E75AFE70085149D2DC735C1F /* Pods-ReactiveCocoaDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveCocoaDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveCocoaDemo/Pods-ReactiveCocoaDemo.debug.xcconfig"; sourceTree = "<group>"; };
+		FA81F96E214FB279007E9EF6 /* RACViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RACViewModel.h; sourceTree = "<group>"; };
+		FA81F96F214FB279007E9EF6 /* RACViewModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RACViewModel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,14 +137,8 @@
 				BC486D371D50723300F6C53B /* Category */,
 				BC1E46BD1B88B99700838AEF /* AppDelegate.h */,
 				BC1E46BE1B88B99700838AEF /* AppDelegate.m */,
-				BC486D211D4F021C00F6C53B /* TableViewController.h */,
-				BC486D221D4F021C00F6C53B /* TableViewController.m */,
-				BC1E46C01B88B99700838AEF /* RACController.h */,
-				BC1E46C11B88B99700838AEF /* RACController.m */,
-				BCE3E4351C2C0B47000A343A /* PushController.h */,
-				BCE3E4361C2C0B47000A343A /* PushController.m */,
-				BC82FCA61C2ABC6B0095E665 /* CommandController.h */,
-				BC82FCA71C2ABC6B0095E665 /* CommandController.m */,
+				FA81F96C214FB23C007E9EF6 /* Controllers */,
+				FA81F96D214FB249007E9EF6 /* ViewModels */,
 				BC1E46C31B88B99700838AEF /* Main.storyboard */,
 				BC1E46C61B88B99700838AEF /* Images.xcassets */,
 				BC1E46C81B88B99700838AEF /* LaunchScreen.xib */,
@@ -192,6 +189,30 @@
 				BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */,
 			);
 			path = ZDAFNetWorkHelper;
+			sourceTree = "<group>";
+		};
+		FA81F96C214FB23C007E9EF6 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				BC486D211D4F021C00F6C53B /* TableViewController.h */,
+				BC486D221D4F021C00F6C53B /* TableViewController.m */,
+				BC1E46C01B88B99700838AEF /* RACController.h */,
+				BC1E46C11B88B99700838AEF /* RACController.m */,
+				BCE3E4351C2C0B47000A343A /* PushController.h */,
+				BCE3E4361C2C0B47000A343A /* PushController.m */,
+				BC82FCA61C2ABC6B0095E665 /* CommandController.h */,
+				BC82FCA71C2ABC6B0095E665 /* CommandController.m */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		FA81F96D214FB249007E9EF6 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				FA81F96E214FB279007E9EF6 /* RACViewModel.h */,
+				FA81F96F214FB279007E9EF6 /* RACViewModel.m */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -343,6 +364,7 @@
 				BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */,
 				BC1E46BC1B88B99700838AEF /* main.m in Sources */,
 				BC82FCA81C2ABC6B0095E665 /* CommandController.m in Sources */,
+				FA81F970214FB279007E9EF6 /* RACViewModel.m in Sources */,
 				BC486D231D4F021C00F6C53B /* TableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

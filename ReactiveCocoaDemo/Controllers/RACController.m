@@ -12,6 +12,7 @@
 #import "PushController.h"
 #import <ReactiveObjC/ReactiveObjC.h>
 #import "ZDAFNetWorkHelper.h"
+#import "RACViewModel.h"
 
 #define FORMATSTRING(FORMAT, ...)                   \
   ([NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
@@ -25,6 +26,7 @@
 @property(weak, nonatomic) IBOutlet UIButton *showTextButton;
 @property(weak, nonatomic) IBOutlet UIButton *pushButton;
 @property (nonatomic, copy) NSString *tempText;
+@property (nonatomic, strong) RACViewModel *viewModel;
 
 @end
 
@@ -34,25 +36,17 @@
     NSLog(@"%s, %d", __PRETTY_FUNCTION__, __LINE__);
 }
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     [self signals];
     //[self actions];
 }
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 #pragma mark - Signal
 #pragma mark -
 
-- (void)signals
-{
+- (void)signals {
     switch (self.type) {
         case 0:
             [self bind];
@@ -150,6 +144,9 @@
         case 31:
             [self sequence];
             break;
+        case 32:
+            [self selectorBindSelector];
+            break;
         default:
             break;
     }
@@ -166,8 +163,7 @@
 // 3.1 sendNext底层其实就是执行subscriber的nextBlock
 
 
-- (void)bind
-{
+- (void)bind {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"2017年01月17日15:38:04"];
         [subscriber sendCompleted];
@@ -187,13 +183,13 @@
         return bindBlock;
     }];
     
+    // SignalB 被订阅时，内部其实是SignalA被订阅了
     [signalB subscribeNext:^(id x) {
         NSLog(@"执行bind之后的结果：%@", x);
     }];
 }
 
-- (void)flattenMap
-{
+- (void)flattenMap {
     RACSignal *signal = [RACSignal return:@"你好"];
     
     [[signal flattenMap:^__kindof RACSignal * _Nullable(id  _Nullable value) {
@@ -207,8 +203,7 @@
     }];
 }
 
-- (void)flatten
-{
+- (void)flatten {
     RACSignal *signal1 = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"测试flatten函数"];
         [subscriber sendCompleted];
@@ -235,8 +230,7 @@
     }];
 }
 
-- (void)map
-{
+- (void)map {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"map1"];
         [subscriber sendCompleted];
@@ -258,8 +252,7 @@
 ///  把多个信号合并成一个信号，任何一个信号有新值的时候就会调用，它会按照时间的先后顺序把信号排列起来
 ///  和combine reduce差不多,总是返回最新的信号，
 ///  区别：每次merge返回的是单一的信号，不能组合，而combineLatest可以把最新返回的信号跟另一个信号进行组合，另一个信号是它的上次的那个信号。可以简单理解成combineLatest可以组合，而merge却不行
-- (void)merge
-{
+- (void)merge {
     // 看源码可知，merge是把几个信号顺序放入到一个数组中，然后放入一个新的信号中，当这个新的信号被订阅时，数组中的信号会被订阅者依次订阅，由于这是信号中的信号，所以最后做了依次flatten操作，取出其中的值。
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
@@ -279,17 +272,19 @@
     [[RACSignal merge:@[signalA, signalB]] subscribeNext:^(id x) {
         NSLog(@"%@", x);
     }];
-//    or:
-//    [[signalA merge:signalB] subscribeNext:^(NSString *x) {
-//        NSLog(@"%@", x);
-//    }];
+    
+    /*
+    or:
+    [[signalA merge:signalB] subscribeNext:^(NSString *x) {
+        NSLog(@"%@", x);
+    }];
+     */
 }
 
 /// 将一组Signal发出的最新的事件合并成一个Signal，每当这组Signal发出新事件时，reduce的block会执行，将所有新事件的值合并成一个值，并当做合并后Signal的事件发出去。
 /// 这个方法会返回合并后的Signal。
 /// reduce的block中参数，其实是与combineLatest中数组元素一一对应的
-- (void)combineLatestReduce
-{
+- (void)combineLatestReduce {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
         [subscriber sendNext:@"2"];
@@ -340,8 +335,7 @@
 ///  意味着如果是一个流的第N个元素，一定要等到另外一个流第N值也收到才会一起组合发出。
 ///
 ///  [C zipWith:D]可以比喻成一对平等恩爱的夫妻，两个人是“绑在一起“的关系来组成一个家庭，决定一件事（value）时必须两个人都提出意见（当且仅当C和D同时都产生了值的时候，一个value才被输出，C、D只有其中一个有值时会挂起，等待另一个的值，所以输出都是一对值（RACTuple）），当夫妻只要一个人先挂了（completed）这个家庭（组合起来的RACStream）就宣布解散（也就是无法凑成一对输出时就终止）
-- (void)zip
-{
+- (void)zip {
     RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"3"];
         //[subscriber sendNext:@"4"];
@@ -369,8 +363,7 @@
 /// 返回一个新的数组，该数组是通过把所有 arrayX 参数添加到 arrayObject 中生成的。如果要进行 concat() 操作的参数是数组，那么添加的是数组中的元素，而不是数组。
 ///
 /// [A concat:B]中只有A信号执行完complete之后才会执行B，如果A失败（比如执行了sendError），则B永远不会执行
-- (void)concat
-{
+- (void)concat {
     RACSequence *letters =
       [@"A B C D E F G H I" componentsSeparatedByString:@" "].rac_sequence;
     RACSequence *numbers =
@@ -383,8 +376,7 @@
 
 /// 当一个订阅者被发送了completed事件后，then:方法才会执行，订阅者会订阅then:方法返回的Signal，这个Signal是在block中返回的。（忽略掉第一个信号的所有值）
 /// 这样优雅的实现了从一个Signal到另一个Signal的订阅。
-- (void)then
-{
+- (void)then {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
         [subscriber sendNext:@"2"];
@@ -413,11 +405,9 @@
 /// replayLazily
 /// 不会重新执行,他与其他2个不同之处是RAC中的信号只有在被订阅后才会执行，而其他的只要执行到那就会执行，就跟do-while一样
 /// http://spin.atomicobject.com/2014/06/29/replay-replaylast-replaylazily/
-- (void)replay
-{
-    ///// RACSubject是RACSignal的子类，它可以快速创建一个信号，用来发送信息
-    RACSubject *letters = [RACSubject
-          subject];
+- (void)replay {
+    // RACSubject是RACSignal的子类，它可以快速创建一个信号，用来发送信息
+    RACSubject *letters = [RACSubject subject];
     // RACSignal *signal = [letters replay];
     // RACSignal *signal = [letters replayLast];
     RACSignal *signal = [letters replayLazily];
@@ -436,17 +426,18 @@
     [signal subscribeNext:^(id x) {
         NSLog(@"L3:      %@", x);
     }];
+    
+    /*
+    [letters sendNext:@"C"];
+    [letters sendNext:@"D"];
 
-//    [letters sendNext:@"C"];
-//    [letters sendNext:@"D"];
-//
-//    [signal subscribeNext:^(id x) {
-//        NSLog(@"S4:   %@", x);
-//    }];
+    [signal subscribeNext:^(id x) {
+        NSLog(@"S4:   %@", x);
+    }];
+     */
 }
 
-- (void)replay1
-{
+- (void)replay1 {
     RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"hello"];
         [subscriber sendNext:@"world"];
@@ -472,8 +463,7 @@
 }
 
 /// replay或者replayLazily只会让信号里面只发送一次，即只执一次num++，当有订阅者时就只会拿到信号当初发送的数据，不会重新发送新的，如果不用replay，则每次有订阅者都会导致racsignal执行一次
-- (void)replayLazily
-{
+- (void)replayLazily {
     __block int num = 0;
     RACSignal *signal = [[RACSignal createSignal:^RACDisposable *(id subscriber) {
         num++;
@@ -499,8 +489,7 @@
 /// 先创建一个`RACSubject`对象，来作为热信号，然后调用`multicast`方法，通过这个`subject`对象和`源信号`作为参数又创建了一个`RACMulticastConnection`对象，
 /// 当调用`connect`方法时，`subject`会订阅`源信号`，即self。
 /// 具体原理请移步`README`
-- (void)mutableConnection
-{
+- (void)mutableConnection {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"发送信息"];
         [subscriber sendCompleted];
@@ -521,8 +510,7 @@
 }
 
 /// 参数为RACScheduler类的对象scheduler，这个方法会返回一个Signal，它的所有事件都会传递给scheduler参数所表示的线程，而以前管道上的副作用还会在以前的线程上。这个方法主要是切换线程。
-- (void)deliverOn
-{
+- (void)deliverOn {
     [[[RACSignal defer:^RACSignal *{
         RACSubject *subject = [RACSubject subject];
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -538,8 +526,7 @@
 }
 
 /// 比较数值流中当前值和上一个值，如果不同，就返回当前值，简单理解为“流”的值有变化时反馈变化的值，求异存同。它将这一次的值与上一次做比较，当相同时（也包括-isEqual:）被忽略掉。
-- (void)distinctUntilChanged
-{
+- (void)distinctUntilChanged {
     [[self.textField.rac_textSignal distinctUntilChanged] subscribeNext:^(id x) {
         NSLog(@"%@", x);
     } completed:^{
@@ -552,8 +539,7 @@
 /// 忽略给定的值，注意，这里忽略的既可以是地址相同的对象，也可以是-
 /// isEqual:结果相同的值，也就是说自己写的Model对象可以通过重写-
 /// isEqual:方法来使- ignore:生效。
-- (void)ignore
-{
+- (void)ignore {
     [[self.textField.rac_textSignal ignore:@"123"] subscribeCompleted:^{
         NSLog(@"完成");
     }];
@@ -561,8 +547,7 @@
 
 /// 这个比较极端，忽略所有值，只关心Signal结束，也就是只取Comletion和Error两个消息，中间所有值都丢弃。
 /// 注意，这个操作应该出现在Signal有终止条件的的情况下，如rac_textSignal这样除dealloc外没有终止条件的Signal上就不太可能用到。
-- (void)ignoreValues
-{
+- (void)ignoreValues {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@1];
         [subscriber sendNext:@2];
@@ -584,8 +569,7 @@
 ///  和- takeUntilBlock:同理，一直跳，直到block为YES
 ///  - skipWhileBlock:(BOOL (^)(id x))
 ///  和- takeWhileBlock:同理，一直跳，直到block为NO
-- (void)skip
-{
+- (void)skip {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@1];
         [subscriber sendNext:@2];
@@ -612,8 +596,7 @@
 }
 
 /// take与skip相反，它是取take的前几条数据，take:参数必须是>0的数
-- (void)take
-{
+- (void)take {
     RACSignal *signal = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"你好"];
         [subscriber sendNext:@1];
@@ -676,8 +659,7 @@
 
 
 /// take数据，直到xxx时候停止
-- (void)takeUntil
-{
+- (void)takeUntil {
     [[self.textField.rac_textSignal takeUntilBlock:^BOOL(NSString *text) {
         return [text isEqualToString:@"结束"];
     }] subscribeNext:^(id x) {
@@ -687,8 +669,7 @@
     }];
 }
 
-- (void)timer
-{
+- (void)timer {
     ///常用两种：
     // 1. 延迟某个时间后再做某件事
     [[RACScheduler mainThreadScheduler] afterDelay:2
@@ -708,8 +689,7 @@
 /// 这个方法常用于处理输入框等信号（用户打字很快），因为它只保留用户最后输入的文字并返回一个新的Signal，将最后的文字作为next事件参数发出。
 ///
 /// 如下0.3秒内textField输入n多个字符，0.3秒后才会把值输出，即：把0.3秒内接收到的信息到最后一块发出去
-- (void)throttle
-{
+- (void)throttle {
     [[[[self.textField.rac_textSignal ignore:@""] throttle:0.3] distinctUntilChanged] subscribeNext:^(id x) {
         NSLog(@"%@", x);
     }];
@@ -717,16 +697,14 @@
 
 /// The receiver must be a signal of signals.
 /// 下面的方法会crash，因为不是信号中的信号
-- (void)swithToLatest
-{
+- (void)swithToLatest {
     [[[[[self.textField.rac_textSignal ignore:@""] throttle:0.3] distinctUntilChanged] switchToLatest] subscribeNext:^(id x) {
         NSLog(@"%@", x);
     }];
 }
 
 ///  把信号转化成事件
-- (void)materialize
-{    
+- (void)materialize {
     [[self.showTextButton.rac_command.executionSignals flattenMap:^__kindof RACSignal * _Nullable(RACSignal<id> * _Nullable value) {
         // materialize 把信号转化成事件
         return [[[value materialize] filter:^BOOL(RACEvent<id> * _Nullable value) {
@@ -740,22 +718,22 @@
 }
 
 /// 当signalA和signalB都至少sendNext过一次，接下来只要其中任意一个signal有了新的内容，doA:withB这个方法就会自动被触发，withSignals:有几个signal，liftselector的选择子中就会有几个参数。
-- (void)liftSelector
-{
+- (void)liftSelector {
+    /*
+    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [subscriber sendNext:@"A"];
+        });
+        return nil;
+    }];
     
-//    RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-//        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//            [subscriber sendNext:@"A"];
-//        });
-//        return nil;
-//    }];
-//    
-//    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-//        [subscriber sendNext:@"B"];
-//        [subscriber sendNext:@"Another B"];
-//        [subscriber sendCompleted];
-//        return nil;
-//    }];
+    RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+        [subscriber sendNext:@"B"];
+        [subscriber sendNext:@"Another B"];
+        [subscriber sendCompleted];
+        return nil;
+    }];
+     */
     
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         NSURLSessionTask *task = [[ZDAFNetWorkHelper shareInstance] requestWithURL:MovieAPI params:nil httpMethod:HttpMethod_Get success:^(id  _Nullable responseObject) {
@@ -788,8 +766,7 @@
 
 /// collect 操作会把多个信号中所有的 next 发送的数据收集到一个 NSArray 中，然后一次性通过 next 发送给后续的环节。
 /// http://fengjian0106.github.io/2016/04/28/The-Power-Of-Composition-In-FRP-Part-3/
-- (void)collect
-{
+- (void)collect {
     RACSignal *numbers = @[@(0), @(1), @(2)].rac_sequence.signal;
     
     RACSignal *letters1 = @[@"A", @"B", @"C"].rac_sequence.signal;
@@ -808,8 +785,7 @@
 
 /// 该操作可将上次`reduceBlock`处理后输出的结果作为参数，传入当次`reduceBlock`操作，往往用于信号输出值的聚合处理。
 /// 这个方法跟`RACSequence`中的`foldLeftWithStart:reduce:`效果是一样的
-- (void)scanWithStart
-{
+- (void)scanWithStart {
     // 下面的例子，第一次会拿到start：0作为上一次的值和新值1相加=1，然后把这个reduce后的结果放入数组中，第二次执行时会拿到上次的1和新值2相加=3，然后把第二次reduce的结果放入数组中，第三次拿到3和新值3，然后再相加=6...，所以最终print一个装有 1，3，6，10的数组。
     RACSequence *numbers = @[@1, @2, @3, @4].rac_sequence;
     // Contains 1, 3, 6, 10
@@ -820,8 +796,7 @@
     NSLog(@"%@", sums.array);
 }
 
-- (void)combinePreviousWithStart
-{
+- (void)combinePreviousWithStart {
     // 这个和上面的不一样，这个函数不会把reduce后的结果放入队列里作为previous。
     // 看源码可以知道，它是把reduce后的结果和next的值打包进tuple中，然后把next的值返回来作为下一次的previous值（即：其实每次在reduce里拿到的previous都是数组中的上一个元素，而不是上次reduce出来的新值），map函数处理后把reduce的值作为最终结果。
     // 所以下面的执行操作其实是：0+1，1+2，2+3，3+4
@@ -835,8 +810,7 @@
 }
 
 /// 聚合，与 combinePreviousWithStart:reduce: 相似
-- (void)aggregate
-{
+- (void)aggregate {
     RACSignal *numbers = @[ @(0), @(1), @(2) ].rac_sequence.signal;
     [[numbers aggregateWithStartFactory:^id{
         return [[NSMutableArray alloc] init];
@@ -850,8 +824,7 @@
 
 /// 这个有点像collect,它也是把`sendNext`的所有结果放入一个数组中,然后把结果转换为tuple类型,最后延迟一次性全部发送;
 /// 不过这里有个地方需要注意的是,从源码可以看到,当订阅者发送`sendCompleted`消息时,会立即执行源信号被订阅时346行位置的`completed:`里面的那个block,然后执行`sendCompleted`,然后`timerDisposable`会被dispose,这样那个延迟方法会失效(其实根本就不执行那个方法了)
-- (void)bufferWithTime
-{
+- (void)bufferWithTime {
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
         [subscriber sendNext:@"1"];
         [subscriber sendNext:@"2"];
@@ -933,7 +906,7 @@
 }
 
 /// `RACSequence`继承于`RACStream`，跟RACSignal是平级的；
-/// 当`RACSequence`换换为`RACSignal`时最终执行的是下面的方法，
+/// 当`RACSequence`转换为`RACSignal`时最终执行的是下面的方法，
 ///
 /// sequence里面包含几个对象，然后被订阅时就会执行多少次，
 /// 原因在于下面的`reschedule()`方法，这其实就相当于是一个递归调用。
@@ -958,7 +931,6 @@
  }
 */
 - (void)sequence {
-    
     RACSequence *sequence = [[@[@0, @1, @2, @3, @4, @5] rac_sequence] filter:^BOOL(id value) {
         return [value intValue] > 1;
     }];
@@ -991,11 +963,45 @@
     }];
 }
 
+/// 需求:一个selector被调用后，会触发另一个selector的调用
+- (void)selectorBindSelector {
+    // 输入文字后触发foo::方法的调用
+#if 1
+    // 方案1 (鉴于对RAC熟悉程度有限，这是笔者目前知道的最优解，欢迎朋友们斧正)
+    [self.viewModel rac_liftSelector:@selector(foo::) withSignals:[[self.textField.rac_textSignal throttle:0.8] ignore:@""], [RACSignal return:@""], nil];
+    
+#elif 0
+    @weakify(self);
+    [[[[self.textField.rac_textSignal throttle:0.8] filter:^BOOL(NSString * _Nullable value) {
+        return value.length > 0;
+    }] bind:^RACSignalBindBlock _Nonnull{
+        RACSignalBindBlock bindBlock = ^RACSignal *(id value, BOOL *stop){
+            //方案2
+            /*
+            return [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+                @strongify(self);
+                [self.viewModel foo:value :nil];
+                [subscriber sendCompleted];
+                return [RACDisposable disposableWithBlock:^{
+                    NSLog(@"信号释放了");
+                }];
+            }];
+             */
+            //方案3
+            @strongify(self);
+            return [self.viewModel rac_liftSelector:@selector(foo::) withSignals:[RACSignal return:value], [RACSignal return:nil], nil];
+        };
+        return bindBlock;
+    }] subscribeNext:^(id  _Nullable x) {
+        NSLog(@"%@", x);
+    }];
+#endif
+}
+
 #pragma mark - ------------------------
 #pragma mark - Search
 
-- (void)search
-{
+- (void)search {
     [[[[[[self.textField.rac_textSignal throttle:0.3] distinctUntilChanged]
       ignore:@""] map:^id(id value) {
 
@@ -1016,8 +1022,7 @@
 
 #pragma mark - Action
 
-- (void)actions
-{
+- (void)actions {
     @weakify(self);
     self.showTextButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
         @strongify(self);
@@ -1028,15 +1033,22 @@
 }
 
 // a和b分别为信号发送的信息
-- (void)doA:(id)a withB:(id)b
-{
+- (void)doA:(id)a withB:(id)b {
     NSLog(@"A:%@ and B:%@", a, b);
+}
+
+#pragma mark - Property
+
+- (RACViewModel *)viewModel {
+    if (!_viewModel) {
+        _viewModel = [RACViewModel new];
+    }
+    return _viewModel;
 }
 
 #pragma mark - 跳转
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"customID"]) {
         PushController *pushVC = segue.destinationViewController;
         __block NSUInteger i = 0;
@@ -1056,21 +1068,28 @@
         [[pushVC.command.executionSignals concat] subscribeNext:^(id x) {
             NSLog(@"%@", x);
         }];
-      
-//      [[pushVC.command.executionSignals map:^id(id value) {
-//          NSLog(@"%@", value);
-//          return value;
-//      }] subscribeNext:^(id x) {
-//          NSLog(@"%@", x);
-//      }];
-      
+        
+        /*
+        [[pushVC.command.executionSignals map:^id(id value) {
+            NSLog(@"%@", value);
+            return value;
+        }] subscribeNext:^(id x) {
+            NSLog(@"%@", x);
+        }];
+         */
+        
         [pushVC.command.executing subscribeNext:^(id x) {
             NSString *result = ([x integerValue] == 1) ? @"执行中" : @"未执行";
             NSLog(@"%@", result);
         }];
-      
     }
 }
 
+#pragma mark -
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
 
 @end
