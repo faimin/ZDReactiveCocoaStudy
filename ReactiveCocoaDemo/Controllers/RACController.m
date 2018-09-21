@@ -972,11 +972,19 @@
     
 #elif 0
     @weakify(self);
-    [[[[self.textField.rac_textSignal throttle:0.8] filter:^BOOL(NSString * _Nullable value) {
+    RACSignal *signal = [[[self.textField.rac_textSignal throttle:0.8] filter:^BOOL(NSString * _Nullable value) {
         return value.length > 0;
-    }] bind:^RACSignalBindBlock _Nonnull{
+    }] replayLazily];
+    
+    //方案2
+    [signal subscribeNext:^(id  _Nullable x) {
+        @strongify(self);
+        [self.viewModel foo:x :nil];
+    }];
+    
+    [[signal bind:^RACSignalBindBlock _Nonnull{
         RACSignalBindBlock bindBlock = ^RACSignal *(id value, BOOL *stop){
-            //方案2
+            //方案3
             /*
             return [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
                 @strongify(self);
@@ -987,7 +995,7 @@
                 }];
             }];
              */
-            //方案3
+            //方案4
             @strongify(self);
             return [self.viewModel rac_liftSelector:@selector(foo::) withSignals:[RACSignal return:value], [RACSignal return:nil], nil];
         };

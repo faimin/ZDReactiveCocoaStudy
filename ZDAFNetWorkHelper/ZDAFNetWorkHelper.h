@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "AFNetworking.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef NS_ENUM (NSUInteger, HttpMethod) {
 	HttpMethod_Get,
 	HttpMethod_Post
@@ -28,7 +30,7 @@ typedef void (^ FailureHandle)(NSError *_Nonnull error);
  *
  *  @return 实例化后的selfClass
  */
-+ (nonnull instancetype)shareInstance;
++ (instancetype)shareInstance;
 
 /**
  *  @abstract GET && POST请求
@@ -41,10 +43,12 @@ typedef void (^ FailureHandle)(NSError *_Nonnull error);
  *
  *  @discussion
  */
-- (nullable NSURLSessionDataTask *)requestWithURL:(nonnull NSString *)URLString
+- (nullable NSURLSessionDataTask *)requestWithURL:(NSString *)URLString
                                            params:(nullable id)params
                                        httpMethod:(HttpMethod)httpMethod
                                           success:(nullable SuccessHandle)successBlock
                                           failure:(nullable FailureHandle)failureBlock;
 
 @end
+
+NS_ASSUME_NONNULL_END
