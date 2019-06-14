@@ -20,6 +20,13 @@
 #define MovieAPI    @"http://api.douban.com/v2/movie/top250"
 #define WeatherAPI  @"http://www.weather.com.cn/data/cityinfo/101010100.html"
 
+@interface Model : NSObject
+@property (nonatomic, strong) NSString *name;
+@property (nonatomic, assign) CGFloat progress;
+@end
+@implementation Model
+@end
+
 @interface RACController ()
 
 @property(weak, nonatomic) IBOutlet UITextField *textField;
@@ -27,6 +34,7 @@
 @property(weak, nonatomic) IBOutlet UIButton *pushButton;
 @property (nonatomic, copy) NSString *tempText;
 @property (nonatomic, strong) RACViewModel *viewModel;
+@property (nonatomic, strong) NSMutableDictionary *models;
 
 @end
 
@@ -761,7 +769,16 @@
         }];
     }];
     
+    // 方法1
     [self rac_liftSelector:@selector(doA:withB:) withSignals:signalA, signalB, nil];
+    
+    // 方法2 (参数必须为RACTuple)
+    [self rac_liftSelector:@selector(doA:withB:) withSignalOfArguments:[RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+        [subscriber sendNext:RACTuplePack(@(10086), [NSObject new])];
+        return [RACDisposable disposableWithBlock:^{
+            NSLog(@"%s", __PRETTY_FUNCTION__);
+        }];
+    }]];
 }
 
 /// collect 操作会把多个信号中所有的 next 发送的数据收集到一个 NSArray 中，然后一次性通过 next 发送给后续的环节。
