@@ -114,6 +114,7 @@
           @"reduceApply",
           @"sequence",
           @"selectorBindSelector",
+          @"subscribe",
         ];
     }
     return _data;

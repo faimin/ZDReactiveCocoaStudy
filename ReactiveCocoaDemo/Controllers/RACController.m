@@ -155,6 +155,9 @@
         case 32:
             [self selectorBindSelector];
             break;
+        case 33:
+            [self subscribe];
+            break;
         default:
             break;
     }
@@ -1021,6 +1024,31 @@
         NSLog(@"%@", x);
     }];
 #endif
+}
+
+/// 直接订阅
+- (void)subscribe {
+    RACSubject *subscriber = [RACSubject subject];
+    [subscriber subscribeNext:^(id  _Nullable x) {
+        NSLog(@"===== %@", x); //print `100` and `我也可以发送数据`
+    }];
+    
+    RACSignal *signal = [RACSignal createSignal:^RACDisposable * _Nullable(id<RACSubscriber>  _Nonnull subscriber) {
+        [subscriber sendNext:@100];
+        // 移除订阅者，如果调用了complete则会导致后面的subscriber::sendNext调用失效
+        //[subscriber sendCompleted];
+        
+        return [RACDisposable disposableWithBlock:^{
+            NSLog(@"dispose...");
+        }];
+    }];
+    [signal subscribe:subscriber];
+    
+    [signal subscribeNext:^(id  _Nullable x) {
+        NSLog(@"subscribeNext = %@", x);
+    }];
+    
+    [subscriber sendNext:@"我也可以发送数据"];
 }
 
 #pragma mark - ------------------------
