@@ -362,7 +362,7 @@
         }];
     }];
 
-    [[signalB zipWith:signalA] subscribeNext:^(id x) {
+    [[RACSignal zip:@[signalB, signalA]] subscribeNext:^(id x) {
         RACTupleUnpack(NSString *str1, NSString *str2) = x;
         NSString *str = FORMATSTRING(@"%@%@", str1, str2);
         NSLog(@"%@,\n %@", x, str);
