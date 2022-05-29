@@ -1,42 +1,16 @@
 PODS:
-  - AFNetworking (3.2.1):
-    - AFNetworking/NSURLSession (= 3.2.1)
-    - AFNetworking/Reachability (= 3.2.1)
-    - AFNetworking/Security (= 3.2.1)
-    - AFNetworking/Serialization (= 3.2.1)
-    - AFNetworking/UIKit (= 3.2.1)
-  - AFNetworking/NSURLSession (3.2.1):
-    - AFNetworking/Reachability
-    - AFNetworking/Security
-    - AFNetworking/Serialization
-  - AFNetworking/Reachability (3.2.1)
-  - AFNetworking/Security (3.2.1)
-  - AFNetworking/Serialization (3.2.1)
-  - AFNetworking/UIKit (3.2.1):
-    - AFNetworking/NSURLSession
-  - FDStackView (1.0.1)
-  - Masonry (1.1.0)
   - ReactiveObjC (3.1.0)
 
 DEPENDENCIES:
-  - AFNetworking
-  - FDStackView
-  - Masonry
   - ReactiveObjC
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
-    - AFNetworking
-    - FDStackView
-    - Masonry
+  https://github.com/CocoaPods/Specs.git:
     - ReactiveObjC
 
 SPEC CHECKSUMS:
-  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
-  FDStackView: fc0697e5be2022c8af36ce66e9e2061006058ba8
-  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   ReactiveObjC: 2a38ea15335de4119d8b17caf1db1484f61db902
 
-PODFILE CHECKSUM: 4a44b0e97681ac43e516f48cb18a285e7cbcede3
+PODFILE CHECKSUM: 2a310d126d796983bb0d504964e2cb00ac5a9c67
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.11.3

@@ -11,7 +11,6 @@
 #import "RACController.h"
 #import "PushController.h"
 #import <ReactiveObjC/ReactiveObjC.h>
-#import "ZDAFNetWorkHelper.h"
 #import "RACViewModel.h"
 
 #define FORMATSTRING(FORMAT, ...)                   \
@@ -747,12 +746,17 @@
      */
     
     RACSignal *signalA = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        NSURLSessionTask *task = [[ZDAFNetWorkHelper shareInstance] requestWithURL:MovieAPI params:nil httpMethod:HttpMethod_Get success:^(id  _Nullable responseObject) {
-            [subscriber sendNext:responseObject];
-            [subscriber sendCompleted];
-        } failure:^(NSError * _Nonnull error) {
-            [subscriber sendError:error];
+        NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:MovieAPI] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            if (error) {
+                [subscriber sendError:error];
+            }
+            else {
+                NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data  options:NSJSONReadingAllowFragments error:nil];
+                [subscriber sendNext:jsonDict];
+                [subscriber sendCompleted];
+            }
         }];
+        [task resume];
         
         return [RACDisposable disposableWithBlock:^{
             [task cancel];
@@ -760,12 +764,17 @@
     }];
     
     RACSignal *signalB = [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
-        NSURLSessionTask *task = [[ZDAFNetWorkHelper shareInstance] requestWithURL:WeatherAPI params:nil httpMethod:HttpMethod_Get success:^(id  _Nullable responseObject) {
-            [subscriber sendNext:responseObject];
-            [subscriber sendCompleted];
-        } failure:^(NSError * _Nonnull error) {
-            [subscriber sendError:error];
+        NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:WeatherAPI] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            if (error) {
+                [subscriber sendError:error];
+            }
+            else {
+                NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data  options:NSJSONReadingAllowFragments error:nil];
+                [subscriber sendNext:jsonDict];
+                [subscriber sendCompleted];
+            }
         }];
+        [task resume];
         
         return [RACDisposable disposableWithBlock:^{
             [task cancel];

@@ -1,11 +1,8 @@
 # Uncomment the next line to define a global platform for your project
-platform :ios, '8.0'
+platform :ios, '9.0'
 
 def usedPod
 	pod 'ReactiveObjC'
-	pod 'Masonry'
-	pod 'AFNetworking'
-	pod 'FDStackView'
 end
 
 inhibit_all_warnings!

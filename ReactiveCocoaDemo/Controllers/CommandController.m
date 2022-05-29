@@ -8,8 +8,6 @@
 
 #import "CommandController.h"
 #import <ReactiveObjC/ReactiveObjC.h>
-#import "ZDAFNetWorkHelper.h"
-
 
 @interface CommandController ()
 

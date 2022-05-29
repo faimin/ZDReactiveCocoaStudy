@@ -19,7 +19,6 @@
 		BC486D3A1D50725A00F6C53B /* RACSignal+Extend.m in Sources */ = {isa = PBXBuildFile; fileRef = BC486D391D50725A00F6C53B /* RACSignal+Extend.m */; };
 		BC82FCA81C2ABC6B0095E665 /* CommandController.m in Sources */ = {isa = PBXBuildFile; fileRef = BC82FCA71C2ABC6B0095E665 /* CommandController.m */; };
 		BCE3E4371C2C0B47000A343A /* PushController.m in Sources */ = {isa = PBXBuildFile; fileRef = BCE3E4361C2C0B47000A343A /* PushController.m */; };
-		BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */; };
 		FA4D2CAABEA40DB4CFDDE282 /* libPods-ReactiveCocoaDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 33CC510B58DD2AC2C644D94D /* libPods-ReactiveCocoaDemo.a */; };
 		FA81F970214FB279007E9EF6 /* RACViewModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FA81F96F214FB279007E9EF6 /* RACViewModel.m */; };
 /* End PBXBuildFile section */
@@ -61,8 +60,6 @@
 		BC82FCA71C2ABC6B0095E665 /* CommandController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CommandController.m; sourceTree = "<group>"; };
 		BCE3E4351C2C0B47000A343A /* PushController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushController.h; sourceTree = "<group>"; };
 		BCE3E4361C2C0B47000A343A /* PushController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PushController.m; sourceTree = "<group>"; };
-		BCFE56891C25CD7F00DD5604 /* ZDAFNetWorkHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZDAFNetWorkHelper.h; sourceTree = "<group>"; };
-		BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZDAFNetWorkHelper.m; sourceTree = "<group>"; };
 		CA14E16FA232FD61FCAE838B /* Pods-ReactiveCocoaDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveCocoaDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveCocoaDemo/Pods-ReactiveCocoaDemo.release.xcconfig"; sourceTree = "<group>"; };
 		E75AFE70085149D2DC735C1F /* Pods-ReactiveCocoaDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ReactiveCocoaDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ReactiveCocoaDemo/Pods-ReactiveCocoaDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		FA81F96E214FB279007E9EF6 /* RACViewModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RACViewModel.h; sourceTree = "<group>"; };
@@ -113,7 +110,6 @@
 		BC1E46AD1B88B99700838AEF = {
 			isa = PBXGroup;
 			children = (
-				BCFE56881C25CD7F00DD5604 /* ZDAFNetWorkHelper */,
 				BC1E46B81B88B99700838AEF /* ReactiveCocoaDemo */,
 				BC1E46D21B88B99700838AEF /* ReactiveCocoaDemoTests */,
 				BC1E46B71B88B99700838AEF /* Products */,
@@ -180,15 +176,6 @@
 				BC486D391D50725A00F6C53B /* RACSignal+Extend.m */,
 			);
 			path = Category;
-			sourceTree = "<group>";
-		};
-		BCFE56881C25CD7F00DD5604 /* ZDAFNetWorkHelper */ = {
-			isa = PBXGroup;
-			children = (
-				BCFE56891C25CD7F00DD5604 /* ZDAFNetWorkHelper.h */,
-				BCFE568A1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m */,
-			);
-			path = ZDAFNetWorkHelper;
 			sourceTree = "<group>";
 		};
 		FA81F96C214FB23C007E9EF6 /* Controllers */ = {
@@ -279,6 +266,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -360,7 +348,6 @@
 				BC1E46C21B88B99700838AEF /* RACController.m in Sources */,
 				BCE3E4371C2C0B47000A343A /* PushController.m in Sources */,
 				BC486D3A1D50725A00F6C53B /* RACSignal+Extend.m in Sources */,
-				BCFE568B1C25CD7F00DD5604 /* ZDAFNetWorkHelper.m in Sources */,
 				BC1E46BF1B88B99700838AEF /* AppDelegate.m in Sources */,
 				BC1E46BC1B88B99700838AEF /* main.m in Sources */,
 				BC82FCA81C2ABC6B0095E665 /* CommandController.m in Sources */,
